@@ -7,6 +7,7 @@
     
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Library QR Core -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.4/html5-qrcode.min.js"></script>
 
     <script>
@@ -26,12 +27,9 @@
     <style>
         body { background-color: #f4f6f8; }
         
-        /* Modifikasi UI dari Library Scanner agar Rapi */
-        #reader { width: 100%; border-radius: 12px; overflow: hidden; border: none !important; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05); background: white; }
-        #reader__dashboard_section_csr span { display: none !important; }
-        #reader__dashboard_section_swaplink { text-decoration: none !important; color: #800000 !important; font-weight: 600; }
-        #reader button { background-color: #800000 !important; color: white !important; border: none !important; padding: 10px 16px !important; border-radius: 8px !important; font-weight: 600 !important; cursor: pointer; margin-bottom: 10px; width: 100%; }
-        #reader select { padding: 8px; border-radius: 8px; border: 1px solid #ccc; width: 100%; margin-bottom: 10px; font-family: 'DM Sans', sans-serif;}
+        /* Area Kamera Custom */
+        #reader { width: 100%; border-radius: 16px; overflow: hidden; background: #e2e8f0; min-height: 250px; display: flex; align-items: center; justify-content: center; }
+        #reader video { border-radius: 16px; object-fit: cover; }
         
         /* Toggle Switch Checkbox CSS */
         .toggle-checkbox:checked { right: 0; border-color: #800000; }
@@ -75,14 +73,21 @@
         <!-- ==================== TAB SCANNER ==================== -->
         <div id="tabScan" class="block space-y-4">
             
-            <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm text-blue-800 mb-4 hidden" id="cameraWarning">
-                <span class="font-bold">Info:</span> Jika kamera tidak muncul, pastikan Anda memberikan izin kamera pada browser, atau pastikan link diakses menggunakan HTTPS.
-            </div>
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 text-center">
+                <p class="text-sm text-slate-500 mb-4">Arahkan kamera ke QR Code undangan peserta.</p>
+                
+                <!-- Area Kamera QR Custom -->
+                <div id="reader" class="relative shadow-inner">
+                    <span class="text-slate-400 font-medium absolute z-0 flex flex-col items-center">
+                        <span class="text-3xl mb-2">📸</span>
+                        Kamera belum aktif
+                    </span>
+                </div>
 
-            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
-                <p class="text-center text-sm text-slate-500 mb-4">Arahkan kamera ke QR Code undangan peserta.</p>
-                <!-- Area Kamera QR -->
-                <div id="reader"></div>
+                <!-- Tombol Kontrol Kamera -->
+                <button id="btnStartCamera" class="w-full bg-maroon text-white font-bold py-3 px-4 rounded-xl mt-4 shadow-lg hover:shadow-xl transition-all flex justify-center items-center gap-2">
+                    <span>Mulai Kamera</span>
+                </button>
             </div>
         </div>
 
@@ -98,7 +103,7 @@
                 </button>
             </div>
 
-            <!-- List Rekap akan di-inject ke sini -->
+            <!-- List Rekap -->
             <div id="rekapContainer" class="space-y-3">
                 <p class="text-center text-sm text-slate-400 py-10">Memuat data kehadiran...</p>
             </div>
@@ -112,7 +117,7 @@
             
             <div class="flex justify-between items-start mb-4 border-b border-slate-100 pb-4">
                 <div>
-                    <span class="inline-block px-2 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-md mb-2">QR Valid</span>
+                    <span class="inline-block px-2 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-md mb-2">✅ QR Valid</span>
                     <h2 id="modalNamaSiswa" class="text-xl font-bold text-maroon leading-tight">Nama Siswa</h2>
                     <p id="modalId" class="text-xs text-slate-500 font-mono mt-1">ID: 123456</p>
                 </div>
@@ -120,7 +125,7 @@
 
             <!-- Info Rencana Kehadiran dari Spreadsheet -->
             <div class="bg-slate-50 rounded-xl p-3 border border-slate-100 mb-5">
-                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Rencana Kehadiran (Konfirmasi):</p>
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Rencana Kehadiran (Dari Web):</p>
                 <div class="flex justify-between text-sm">
                     <span class="text-slate-600">Siswa: <strong id="rencanaSiswa" class="text-slate-800">-</strong></span>
                     <span class="text-slate-600">Ortu: <strong id="rencanaOrtu" class="text-slate-800">-</strong></span>
@@ -163,18 +168,15 @@
         <p class="text-maroon font-semibold" id="loadingText">Mencari data...</p>
     </div>
 
+    <!-- Script Kustom -->
     <script>
         // GANTI DENGAN URL DEPLOYMENT APPS SCRIPT ANDA
         const API_URL = "https://script.google.com/macros/s/AKfycbzxCt_v9Q6FuYoDicPT86FmueL87FhalCVcA8Zh4o7OQgp787spfOVioxMhJQwo4Q4y/exec"; 
         
-        let html5QrcodeScanner;
+        let html5QrCode;
+        let isScanning = false;
         let currentWaScanned = "";
         let currentNamaScanned = "";
-
-        // Tampilkan peringatan kamera jika protokol bukan HTTPS (kecuali localhost)
-        if (window.location.protocol !== "https:" && window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1") {
-            document.getElementById('cameraWarning').classList.remove('hidden');
-        }
 
         // ==========================================
         // TAB NAVIGATION LOGIC
@@ -197,26 +199,66 @@
             tabScan.classList.add('hidden');
             tabRekap.classList.remove('hidden');
             loadRekap();
+            
+            // Matikan kamera jika sedang pindah tab
+            if(isScanning) stopCamera();
         });
 
         // ==========================================
-        // QR SCANNER LOGIC
+        // CUSTOM QR SCANNER LOGIC
         // ==========================================
-        function onScanSuccess(decodedText, decodedResult) {
-            if(html5QrcodeScanner) html5QrcodeScanner.pause(true);
-            currentWaScanned = decodedText;
-            fetchDataSiswa(decodedText);
+        document.addEventListener("DOMContentLoaded", () => {
+            html5QrCode = new Html5Qrcode("reader");
+        });
+
+        const btnStartCamera = document.getElementById('btnStartCamera');
+
+        btnStartCamera.addEventListener('click', () => {
+            if (isScanning) {
+                stopCamera();
+            } else {
+                startCamera();
+            }
+        });
+
+        function startCamera() {
+            btnStartCamera.textContent = "Memulai...";
+            btnStartCamera.disabled = true;
+
+            html5QrCode.start(
+                { facingMode: "environment" }, // Prioritas kamera belakang
+                { fps: 10, qrbox: { width: 250, height: 250 } },
+                onScanSuccess,
+                (errorMessage) => { /* Abaikan error tiap frame frame */ }
+            ).then(() => {
+                isScanning = true;
+                btnStartCamera.disabled = false;
+                btnStartCamera.innerHTML = "⏹ Matikan Kamera";
+                btnStartCamera.className = "w-full bg-slate-500 text-white font-bold py-3 px-4 rounded-xl mt-4 shadow-md hover:bg-slate-600 transition-all flex justify-center items-center gap-2";
+            }).catch((err) => {
+                btnStartCamera.disabled = false;
+                btnStartCamera.textContent = "Mulai Kamera";
+                alert("Gagal membuka kamera. Pastikan Anda telah memberikan izin (Allow) pada browser.");
+            });
         }
 
-        function initScanner() {
-            // Pengaturan Scanner: Prioritaskan Kamera Belakang HP
-            html5QrcodeScanner = new Html5QrcodeScanner("reader", { 
-                fps: 10, 
-                qrbox: { width: 250, height: 250 },
-                aspectRatio: 1.0,
-                videoConstraints: { facingMode: "environment" } 
-            }, false);
-            html5QrcodeScanner.render(onScanSuccess);
+        function stopCamera() {
+            if (html5QrCode) {
+                html5QrCode.stop().then(() => {
+                    isScanning = false;
+                    btnStartCamera.innerHTML = "Mulai Kamera";
+                    btnStartCamera.className = "w-full bg-maroon text-white font-bold py-3 px-4 rounded-xl mt-4 shadow-lg hover:shadow-xl transition-all flex justify-center items-center gap-2";
+                }).catch(err => {
+                    console.log("Failed to stop", err);
+                });
+            }
+        }
+
+        function onScanSuccess(decodedText, decodedResult) {
+            // Hentikan kamera sementara setelah QR ditemukan
+            stopCamera();
+            currentWaScanned = decodedText;
+            fetchDataSiswa(decodedText);
         }
 
         // ==========================================
@@ -231,7 +273,6 @@
 
                 if(data.status === "error") {
                     alert("Gagal: " + data.message);
-                    if(html5QrcodeScanner) html5QrcodeScanner.resume();
                     return;
                 }
 
@@ -240,11 +281,11 @@
                 document.getElementById('modalNamaSiswa').textContent = data.siswa.nama;
                 document.getElementById('modalId').textContent = "WA/ID: " + wa;
 
-                // Tampilkan rencana
+                // Tampilkan rencana konfirmasi dari web
                 document.getElementById('rencanaSiswa').textContent = data.konfirmasi ? (data.konfirmasi.hadirSiswa === "offline" ? "Hadir" : "Tidak/Online") : "Belum Isi";
                 document.getElementById('rencanaOrtu').textContent  = data.konfirmasi ? (data.konfirmasi.hadirOrtu === "offline" ? "Hadir" : "Tidak/Online") : "Belum Isi";
 
-                // SET CHECKBOX STATUS (Jika sebelumnya sudah discan)
+                // SET CHECKBOX STATUS
                 const chkSiswa = document.getElementById('checkSiswa');
                 const chkOrtu = document.getElementById('checkOrtu');
                 
@@ -252,7 +293,7 @@
                     chkSiswa.checked = (data.checkin.siswaHadir === "HADIR");
                     chkOrtu.checked = (data.checkin.ortuHadir === "HADIR");
                 } else {
-                    // Default centang otomatis sesuai konfirmasi agar panitia cepat
+                    // Default mengikuti isian form
                     chkSiswa.checked = data.konfirmasi ? (data.konfirmasi.hadirSiswa === "offline") : false;
                     chkOrtu.checked = data.konfirmasi ? (data.konfirmasi.hadirOrtu === "offline") : false;
                 }
@@ -262,7 +303,6 @@
             } catch (err) {
                 hideLoading();
                 alert("Koneksi gagal. Cek internet Anda.");
-                if(html5QrcodeScanner) html5QrcodeScanner.resume();
             }
         }
 
@@ -376,7 +416,8 @@
             box.classList.add('translate-y-full');
             setTimeout(() => { 
                 modal.classList.add('hidden');
-                if(html5QrcodeScanner) html5QrcodeScanner.resume();
+                // Auto start camera again to scan next person
+                startCamera();
             }, 300);
         }
 
@@ -388,10 +429,6 @@
         function hideLoading() {
             document.getElementById('loadingScreen').classList.add('hidden');
         }
-
-        document.addEventListener("DOMContentLoaded", () => {
-            initScanner();
-        });
 
     </script>
 </body>
