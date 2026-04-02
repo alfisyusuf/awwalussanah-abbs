@@ -3,310 +3,1102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Undangan Awwalussanah SMA ABBS Surakarta</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: { primary: '#1e3a8a', gold: '#d4af37' },
-                    fontFamily: { sans: ['"Plus Jakarta Sans"'], serif: ['"Playfair Display"'] }
-                }
-            }
-        }
-    </script>
+    <title>Undangan Awwalussanah – SMA ABBS Surakarta</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <style>
-        body { background-color: #f1f5f9; }
-        .loader-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .7; transform: scale(0.95); } }
-        
-        input[type="radio"]:checked + div { border-color: #1e3a8a; background-color: #eff6ff; }
-        input[type="radio"]:checked + div .radio-dot { background-color: #1e3a8a; border-color: #1e3a8a; }
+        /* ============================================
+           DESIGN TOKENS & BASE
+        ============================================ */
+        :root {
+            --navy:      #0f2240;
+            --navy-mid:  #1a3a6e;
+            --gold:      #c9a84c;
+            --gold-light:#f0dfa0;
+            --gold-pale: #fdf8ec;
+            --cream:     #fafaf7;
+            --ink:       #1c1c1c;
+            --muted:     #7a7a7a;
+            --border:    #e8e2d4;
+            --green:     #2d6a4f;
+            --green-bg:  #e8f5ee;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            background: #e8e4dc;
+            font-family: 'DM Sans', sans-serif;
+            color: var(--ink);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ============================================
+           PRELOADER
+        ============================================ */
+        #preloader {
+            position: fixed; inset: 0; z-index: 100;
+            background: var(--navy);
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            gap: 20px;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
+
+        #preloader.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .loader-logo {
+            width: 88px; height: 88px;
+            border-radius: 50%;
+            border: 2px solid rgba(201,168,76,0.3);
+            display: flex; align-items: center; justify-content: center;
+            position: relative;
+            animation: rotateRing 3s linear infinite;
+        }
+
+        /* ---- Ganti src ini dengan URL logo sekolah Anda ---- */
+        .loader-logo-img {
+            width: 72px; height: 72px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--gold);
+        }
+
+        /* Fallback jika logo tidak tersedia: monogram */
+        .loader-logo-fallback {
+            width: 72px; height: 72px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--navy-mid), #2a5299);
+            border: 2px solid var(--gold);
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 26px; font-weight: 700;
+            color: var(--gold);
+            letter-spacing: 1px;
+        }
+
+        @keyframes rotateRing {
+            to { transform: rotate(360deg); }
+        }
+
+        .loader-ring-dot {
+            position: absolute; top: -5px; left: 50%;
+            transform: translateX(-50%);
+            width: 9px; height: 9px;
+            background: var(--gold);
+            border-radius: 50%;
+        }
+
+        .loader-text {
+            text-align: center;
+        }
+        .loader-text h2 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 22px; font-weight: 600;
+            color: #fff; letter-spacing: 1px;
+        }
+        .loader-text p {
+            font-size: 12px; color: rgba(255,255,255,0.5);
+            margin-top: 6px; letter-spacing: 0.5px;
+            animation: blink 1.6s ease-in-out infinite;
+        }
+        @keyframes blink { 0%,100%{opacity:.5} 50%{opacity:1} }
+
+        /* ============================================
+           ERROR SCREEN
+        ============================================ */
+        #errorScreen {
+            position: fixed; inset: 0; z-index: 90;
+            background: var(--cream);
+            display: none;
+            flex-direction: column; align-items: center; justify-content: center;
+            gap: 12px; padding: 32px;
+            text-align: center;
+        }
+        #errorScreen .err-icon { font-size: 48px; }
+        #errorScreen h2 { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: var(--navy); }
+        #errorScreen p { color: var(--muted); font-size: 14px; line-height: 1.7; }
+
+        /* ============================================
+           APP WRAPPER
+        ============================================ */
+        #app {
+            max-width: 430px;
+            margin: 0 auto;
+            min-height: 100vh;
+            background: var(--cream);
+            display: none;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        /* ============================================
+           HERO HEADER
+        ============================================ */
+        .hero {
+            background: linear-gradient(160deg, var(--navy) 0%, var(--navy-mid) 100%);
+            padding: 40px 28px 52px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute; inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c9a84c' fill-opacity='0.07'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(201,168,76,0.15);
+            border: 1px solid rgba(201,168,76,0.3);
+            border-radius: 100px;
+            padding: 6px 14px;
+            margin-bottom: 20px;
+        }
+        .hero-badge span { font-size: 11px; color: var(--gold-light); letter-spacing: 1.5px; text-transform: uppercase; font-weight: 500; }
+        .hero-badge::before { content: '✦'; color: var(--gold); font-size: 10px; }
+
+        /* Sekolah brand row */
+        .hero-brand {
+            display: flex; align-items: center; gap: 14px;
+            margin-bottom: 28px;
+        }
+        .hero-logo {
+            width: 52px; height: 52px;
+            border-radius: 50%;
+            border: 2px solid rgba(201,168,76,0.5);
+            overflow: hidden;
+            flex-shrink: 0;
+            background: rgba(255,255,255,0.08);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .hero-logo img { width: 100%; height: 100%; object-fit: cover; }
+        /* Fallback monogram di hero */
+        .hero-logo-mono {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 18px; font-weight: 700;
+            color: var(--gold);
+        }
+        .hero-brand-text p:first-child {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 18px; font-weight: 700;
+            color: #fff;
+        }
+        .hero-brand-text p:last-child { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 2px; }
+
+        .hero-divider {
+            width: 40px; height: 1px;
+            background: linear-gradient(to right, var(--gold), transparent);
+            margin: 0 0 20px;
+        }
+
+        .hero h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 42px; font-weight: 700;
+            color: #fff; line-height: 1.1;
+            margin-bottom: 8px;
+        }
+
+        .hero-sub { font-size: 13px; color: rgba(255,255,255,0.55); }
+
+        /* Gold bottom trim */
+        .hero::after {
+            content: '';
+            position: absolute; bottom: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(to right, transparent, var(--gold), transparent);
+        }
+
+        /* Swoosh bottom shape */
+        .hero-swoosh {
+            position: absolute; bottom: -1px; left: 0; right: 0;
+        }
+
+        /* ============================================
+           RECIPIENT CARD
+        ============================================ */
+        .section-pad { padding: 0 24px; }
+
+        .recipient-card {
+            margin: -24px 20px 0;
+            background: #fff;
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 8px 40px rgba(15,34,64,0.12);
+            border: 1px solid var(--border);
+            text-align: center;
+            position: relative; z-index: 10;
+        }
+
+        .recipient-label {
+            font-size: 11px; text-transform: uppercase;
+            letter-spacing: 2px; color: var(--muted); margin-bottom: 8px;
+        }
+
+        .recipient-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 26px; font-weight: 700;
+            color: var(--navy); line-height: 1.2; margin-bottom: 4px;
+        }
+
+        .recipient-sub { font-size: 13px; color: var(--muted); }
+
+        .recipient-ornament {
+            width: 48px; height: 2px;
+            background: linear-gradient(to right, var(--gold), var(--gold-light), var(--gold));
+            margin: 16px auto 0;
+            border-radius: 2px;
+        }
+
+        /* ============================================
+           BISMILLAH BANNER
+        ============================================ */
+        .bismillah-banner {
+            margin: 28px 24px;
+            background: var(--gold-pale);
+            border: 1px solid rgba(201,168,76,0.25);
+            border-radius: 16px;
+            padding: 20px 24px;
+            text-align: center;
+        }
+
+        .bismillah-arabic {
+            font-size: 24px;
+            color: var(--navy);
+            margin-bottom: 8px;
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 600;
+            letter-spacing: 2px;
+        }
+
+        .bismillah-text {
+            font-size: 12px; color: var(--muted);
+            line-height: 1.6;
+            font-style: italic;
+        }
+
+        /* ============================================
+           OPENING PARAGRAPH
+        ============================================ */
+        .opening-text {
+            margin: 0 24px 28px;
+            font-size: 14px;
+            color: #444;
+            line-height: 1.8;
+            text-align: center;
+        }
+
+        /* ============================================
+           SECTION HEADING
+        ============================================ */
+        .section-heading {
+            display: flex; align-items: center; gap: 12px;
+            margin: 0 24px 16px;
+        }
+        .section-heading h3 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 20px; font-weight: 700;
+            color: var(--navy); white-space: nowrap;
+        }
+        .section-heading-line {
+            flex: 1; height: 1px;
+            background: linear-gradient(to right, var(--border), transparent);
+        }
+
+        /* ============================================
+           EVENT INFO CARD
+        ============================================ */
+        .info-card {
+            margin: 0 24px 28px;
+            background: #fff;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .info-row {
+            display: flex; align-items: flex-start;
+            padding: 16px 20px;
+            gap: 14px;
+            border-bottom: 1px solid var(--border);
+        }
+        .info-row:last-child { border-bottom: none; }
+
+        .info-icon {
+            width: 38px; height: 38px;
+            border-radius: 10px;
+            background: var(--gold-pale);
+            border: 1px solid rgba(201,168,76,0.2);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px; flex-shrink: 0;
+        }
+
+        .info-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px; }
+        .info-value { font-size: 14px; font-weight: 600; color: var(--ink); line-height: 1.4; }
+
+        /* ============================================
+           RUNDOWN / TIMELINE
+        ============================================ */
+        .rundown-wrap { margin: 0 24px 28px; }
+
+        .timeline { position: relative; padding-left: 24px; }
+        .timeline::before {
+            content: '';
+            position: absolute; left: 7px; top: 8px; bottom: 8px;
+            width: 1px;
+            background: linear-gradient(to bottom, var(--gold), transparent);
+        }
+
+        .timeline-item {
+            position: relative;
+            padding: 0 0 20px 20px;
+        }
+        .timeline-item:last-child { padding-bottom: 0; }
+
+        .timeline-dot {
+            position: absolute; left: -17px; top: 5px;
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--gold);
+            border: 2px solid var(--cream);
+            box-shadow: 0 0 0 2px rgba(201,168,76,0.3);
+        }
+
+        .timeline-time {
+            font-size: 11px; font-weight: 600;
+            color: var(--gold); letter-spacing: 0.5px;
+            margin-bottom: 3px;
+        }
+
+        .timeline-event { font-size: 14px; color: var(--ink); font-weight: 500; }
+
+        /* ============================================
+           QR CODE
+        ============================================ */
+        .qr-section {
+            margin: 0 24px 28px;
+            background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
+            border-radius: 20px;
+            padding: 28px 24px;
+            text-align: center;
+            position: relative; overflow: hidden;
+        }
+
+        .qr-section::before {
+            content: '';
+            position: absolute; inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23c9a84c' fill-opacity='0.06'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/svg%3E");
+        }
+
+        .qr-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 20px; font-weight: 700;
+            color: #fff; margin-bottom: 6px;
+            position: relative; z-index: 1;
+        }
+
+        .qr-subtitle { font-size: 12px; color: rgba(255,255,255,0.55); margin-bottom: 24px; position: relative; z-index: 1; line-height: 1.6; }
+
+        .qr-frame {
+            display: inline-block;
+            background: #fff;
+            padding: 12px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            position: relative; z-index: 1;
+        }
+
+        #qrcode canvas, #qrcode img { border-radius: 6px; display: block; }
+
+        .qr-id { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 16px; letter-spacing: 1px; position: relative; z-index: 1; }
+
+        /* ============================================
+           CONFIRMATION: CONFIRMED VIEW
+        ============================================ */
+        #confirmedView {
+            margin: 0 24px 28px;
+            background: #fff;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            display: none;
+        }
+
+        .confirmed-header {
+            background: var(--green-bg);
+            padding: 24px;
+            text-align: center;
+            border-bottom: 1px solid rgba(45,106,79,0.1);
+        }
+
+        .confirmed-icon {
+            width: 56px; height: 56px;
+            background: #fff;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 12px;
+            box-shadow: 0 4px 16px rgba(45,106,79,0.15);
+            font-size: 24px;
+        }
+
+        .confirmed-header h3 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 22px; font-weight: 700;
+            color: var(--green); margin-bottom: 4px;
+        }
+
+        .confirmed-header p { font-size: 13px; color: #5a8a70; }
+
+        .confirmed-body { padding: 20px 24px; }
+
+        .status-row {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 16px;
+            background: var(--cream);
+            border-radius: 12px;
+            margin-bottom: 10px;
+        }
+        .status-row:last-of-type { margin-bottom: 0; }
+
+        .status-label { font-size: 12px; color: var(--muted); margin-bottom: 3px; }
+        .status-value { font-size: 14px; font-weight: 600; color: var(--ink); }
+
+        .status-badge {
+            font-size: 11px; font-weight: 600;
+            padding: 4px 10px; border-radius: 100px;
+        }
+        .badge-offline { background: #e0f0ff; color: #1a5fb4; }
+        .badge-online  { background: #e8f5ee; color: var(--green); }
+        .badge-absent  { background: #fce8e8; color: #c0392b; }
+
+        .btn-edit {
+            display: block; width: 100%;
+            margin-top: 16px;
+            padding: 14px;
+            border-radius: 12px;
+            border: 1.5px solid var(--border);
+            background: #fff;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px; font-weight: 600;
+            color: var(--navy);
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .btn-edit:hover { background: var(--cream); border-color: var(--navy); }
+
+        /* ============================================
+           FORM SECTION
+        ============================================ */
+        #formSection {
+            margin: 0 24px 40px;
+            background: #fff;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            display: none;
+        }
+
+        .form-header {
+            background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
+            padding: 24px;
+            text-align: center;
+        }
+
+        .form-header h3 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 22px; font-weight: 700;
+            color: #fff; margin-bottom: 6px;
+        }
+
+        .form-header p { font-size: 12px; color: rgba(255,255,255,0.6); line-height: 1.6; }
+
+        .form-body { padding: 24px; }
+
+        .field-group { margin-bottom: 24px; }
+        .field-group:last-of-type { margin-bottom: 28px; }
+
+        .field-label {
+            font-size: 12px; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 1px;
+            color: var(--muted); margin-bottom: 12px; display: block;
+        }
+
+        .radio-options { display: flex; flex-direction: column; gap: 8px; }
+
+        .radio-option { cursor: pointer; display: block; }
+        .radio-option input { position: absolute; opacity: 0; width: 0; height: 0; }
+
+        .radio-box {
+            display: flex; align-items: center; gap: 12px;
+            padding: 14px 16px;
+            border-radius: 12px;
+            border: 1.5px solid var(--border);
+            background: var(--cream);
+            transition: border-color 0.2s, background 0.2s;
+        }
+
+        .radio-option input:checked + .radio-box {
+            border-color: var(--navy);
+            background: #f0f4ff;
+        }
+
+        .radio-circle {
+            width: 18px; height: 18px;
+            border-radius: 50%;
+            border: 2px solid #ccc;
+            flex-shrink: 0;
+            transition: border-color 0.2s, background 0.2s;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .radio-option input:checked + .radio-box .radio-circle {
+            border-color: var(--navy);
+            background: var(--navy);
+        }
+
+        .radio-circle::after {
+            content: '';
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: transparent;
+            transition: background 0.2s;
+        }
+
+        .radio-option input:checked + .radio-box .radio-circle::after {
+            background: #fff;
+        }
+
+        .radio-emoji { font-size: 16px; }
+        .radio-text { font-size: 14px; font-weight: 500; color: var(--ink); }
+
+        .btn-submit {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
+            color: #fff;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 15px; font-weight: 600;
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            letter-spacing: 0.3px;
+            box-shadow: 0 6px 24px rgba(15,34,64,0.25);
+            transition: opacity 0.2s, transform 0.15s;
+            position: relative; overflow: hidden;
+        }
+
+        .btn-submit::after {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.08), transparent);
+        }
+
+        .btn-submit:hover { opacity: 0.92; transform: translateY(-1px); }
+        .btn-submit:active { transform: translateY(0); }
+        .btn-submit:disabled { opacity: 0.65; cursor: not-allowed; }
+
+        .btn-cancel {
+            display: block; width: 100%;
+            padding: 12px;
+            background: none; border: none;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13px; color: var(--muted);
+            cursor: pointer; margin-top: 8px;
+        }
+        .btn-cancel:hover { color: var(--ink); }
+
+        /* ============================================
+           FOOTER
+        ============================================ */
+        .invite-footer {
+            margin: 0 24px 40px;
+            text-align: center;
+        }
+
+        .footer-ornament {
+            display: flex; align-items: center; gap: 12px;
+            margin-bottom: 16px;
+        }
+        .footer-line { flex: 1; height: 1px; background: var(--border); }
+        .footer-ornament span { color: var(--gold); font-size: 14px; }
+
+        .footer-logo { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border); margin: 0 auto 10px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: var(--navy); }
+        .footer-logo .footer-mono { font-family: 'Cormorant Garamond', serif; font-size: 13px; font-weight: 700; color: var(--gold); }
+
+        .footer-name { font-family: 'Cormorant Garamond', serif; font-size: 16px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+        .footer-sub { font-size: 11px; color: var(--muted); }
+
+        /* ============================================
+           TOAST NOTIFICATION
+        ============================================ */
+        .toast {
+            position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-80px);
+            background: var(--green); color: #fff;
+            padding: 14px 24px; border-radius: 100px;
+            font-size: 13px; font-weight: 500;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 999; white-space: nowrap;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+
+        /* ============================================
+           ENTRANCE ANIMATION
+        ============================================ */
+        .fade-up {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        .fade-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
     </style>
 </head>
-<body class="antialiased text-slate-800 relative">
+<body>
 
-    <div id="preloader" class="fixed inset-0 z-50 bg-white flex flex-col items-center justify-center transition-opacity duration-700">
-        <h2 class="font-serif text-3xl text-primary font-bold">SMA ABBS</h2>
-        <p class="text-slate-500 mt-2 animate-pulse text-sm">Menyiapkan Undangan Anda...</p>
+<!-- ======= PRELOADER ======= -->
+<div id="preloader">
+    <div class="loader-logo">
+        <div class="loader-ring-dot"></div>
+        <!--
+            CARA TAMBAH LOGO SEKOLAH:
+            Ganti <div class="loader-logo-fallback"> di bawah ini dengan:
+            <img class="loader-logo-img" src="URL_LOGO_SEKOLAH" alt="Logo SMA ABBS" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <div class="loader-logo-fallback" style="display:none">AB</div>
+        -->
+        <div class="loader-logo-fallback">AB</div>
     </div>
-
-    <div id="errorScreen" class="fixed inset-0 z-40 bg-white flex flex-col items-center justify-center hidden">
-        <h2 class="font-bold text-xl text-red-600 mb-2">Undangan Tidak Ditemukan</h2>
-        <p id="errorText" class="text-slate-500 text-center px-6">Pastikan link yang Anda buka sudah benar.</p>
+    <div class="loader-text">
+        <h2>SMA ABBS Surakarta</h2>
+        <p>Memuat undangan Anda…</p>
     </div>
+</div>
 
-    <div id="app" class="max-w-md mx-auto min-h-screen bg-white shadow-2xl relative hidden opacity-0 transition-opacity duration-1000">
-        
-        <div class="relative w-full h-48 bg-primary rounded-b-[2.5rem] shadow-md overflow-hidden">
-            <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/arabesque.png')] opacity-20"></div>
-            <div class="absolute inset-0 flex flex-col items-center justify-center text-center p-6 text-white z-10">
-                <p class="text-gold text-sm tracking-widest uppercase mb-1 font-semibold">Undangan Resmi</p>
-                <h1 class="font-serif text-3xl font-bold leading-tight">Awwalussanah</h1>
-                <p id="tahunAjaran" class="text-slate-200 mt-2 text-sm">-</p>
+<!-- ======= ERROR SCREEN ======= -->
+<div id="errorScreen">
+    <div class="err-icon">🔍</div>
+    <h2>Undangan Tidak Ditemukan</h2>
+    <p id="errorText">Mohon pastikan tautan yang Anda buka sudah benar, atau hubungi pihak sekolah.</p>
+</div>
+
+<!-- ======= APP ======= -->
+<div id="app">
+
+    <!-- HERO -->
+    <div class="hero">
+        <div class="hero-brand">
+            <div class="hero-logo">
+                <!--
+                    Ganti konten di bawah ini jika ada logo:
+                    <img src="URL_LOGO" alt="Logo SMA ABBS">
+                -->
+                <span class="hero-logo-mono">AB</span>
+            </div>
+            <div class="hero-brand-text">
+                <p>SMA ABBS Surakarta</p>
+                <p>Al-Azhar Syifa Budi Solo</p>
             </div>
         </div>
 
-        <div class="px-6 py-8">
-            <div class="text-center mb-8">
-                <p class="text-slate-500 text-sm">Kepada Yth.</p>
-                <h2 id="namaSiswaDisplay" class="text-2xl font-bold text-primary mt-1 mb-1">-</h2>
-                <p class="text-slate-600 text-sm">dan Orang Tua/Wali</p>
-                <div class="w-12 h-1 bg-gold mx-auto mt-4 rounded-full"></div>
-            </div>
+        <div class="hero-badge"><span>Undangan Resmi</span></div>
 
-            <div class="bg-slate-50 rounded-2xl p-5 border border-slate-100 shadow-sm mb-8">
-                <h3 class="font-semibold text-lg mb-4 text-primary">Informasi Acara</h3>
-                <ul class="space-y-4">
-                    <li class="flex items-start">
-                        <span class="bg-blue-100 text-primary p-2 rounded-lg mr-3">📅</span>
-                        <div><p class="text-xs text-slate-500">Tanggal</p><p id="tanggalAcara" class="font-medium">-</p></div>
-                    </li>
-                    <li class="flex items-start">
-                        <span class="bg-blue-100 text-primary p-2 rounded-lg mr-3">⏰</span>
-                        <div><p class="text-xs text-slate-500">Waktu</p><p class="font-medium"><span id="waktuAcara">-</span> WIB</p></div>
-                    </li>
-                    <li class="flex items-start">
-                        <span class="bg-blue-100 text-primary p-2 rounded-lg mr-3">📍</span>
-                        <div><p class="text-xs text-slate-500">Tempat</p><p id="tempatAcara" class="font-medium">-</p></div>
-                    </li>
-                    <li class="flex items-start">
-                        <span class="bg-blue-100 text-primary p-2 rounded-lg mr-3">👔</span>
-                        <div><p class="text-xs text-slate-500">Dresscode</p><p id="dresscodeAcara" class="font-medium">-</p></div>
-                    </li>
-                </ul>
-            </div>
+        <div class="hero-divider"></div>
 
-            <div class="mb-8">
-                <h3 class="font-semibold text-lg mb-4 text-primary">Rundown Acara</h3>
-                <div id="rundownContainer" class="space-y-3"></div>
-            </div>
+        <h1>Awwalussanah<br><span id="tahunAjaran" style="font-size:22px;opacity:.7">—</span></h1>
+        <p class="hero-sub" style="margin-top:10px">Selamat datang di tahun ajaran baru</p>
+    </div>
 
-            <div class="mb-8 text-center bg-white p-6 rounded-2xl border-2 border-dashed border-slate-200">
-                <h3 class="font-semibold text-lg text-primary mb-2">QR Code Presensi</h3>
-                <p class="text-sm text-slate-500 mb-4">Tunjukkan kode ini saat registrasi</p>
-                <div class="flex justify-center mb-2">
-                    <div id="qrcode" class="p-3 bg-white rounded-xl shadow-sm border border-slate-100 inline-block"></div>
+    <!-- RECIPIENT -->
+    <div class="recipient-card fade-up">
+        <p class="recipient-label">Undangan ini disampaikan kepada</p>
+        <p class="recipient-name" id="namaSiswaDisplay">—</p>
+        <p class="recipient-sub">beserta Bapak/Ibu Orang Tua atau Wali</p>
+        <div class="recipient-ornament"></div>
+    </div>
+
+    <!-- BISMILLAH -->
+    <div class="bismillah-banner fade-up" style="transition-delay:.1s">
+        <div class="bismillah-arabic">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</div>
+        <p class="bismillah-text">Dengan nama Allah Yang Maha Pengasih lagi Maha Penyayang</p>
+    </div>
+
+    <!-- OPENING -->
+    <p class="opening-text fade-up" style="transition-delay:.15s">
+        Assalamu'alaikum Warahmatullahi Wabarakatuh.<br><br>
+        Dengan hormat, kami mengundang Bapak/Ibu serta putra-putri tercinta untuk hadir dalam acara <strong>Awwalussanah</strong> — pembuka tahun ajaran baru yang kami selenggarakan sebagai wujud syukur kepada Allah Subhanahu Wa Ta'ala. Kehadiran Bapak/Ibu merupakan kebanggaan dan kehormatan bagi kami.
+    </p>
+
+    <!-- EVENT INFO -->
+    <div class="section-heading fade-up" style="transition-delay:.2s">
+        <h3>Informasi Acara</h3>
+        <div class="section-heading-line"></div>
+    </div>
+
+    <div class="info-card fade-up" style="transition-delay:.25s">
+        <div class="info-row">
+            <div class="info-icon">📅</div>
+            <div>
+                <p class="info-label">Hari & Tanggal</p>
+                <p class="info-value" id="tanggalAcara">—</p>
+            </div>
+        </div>
+        <div class="info-row">
+            <div class="info-icon">🕐</div>
+            <div>
+                <p class="info-label">Waktu</p>
+                <p class="info-value"><span id="waktuAcara">—</span> WIB</p>
+            </div>
+        </div>
+        <div class="info-row">
+            <div class="info-icon">📍</div>
+            <div>
+                <p class="info-label">Tempat</p>
+                <p class="info-value" id="tempatAcara">—</p>
+            </div>
+        </div>
+        <div class="info-row">
+            <div class="info-icon">👔</div>
+            <div>
+                <p class="info-label">Dresscode</p>
+                <p class="info-value" id="dresscodeAcara">—</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- RUNDOWN -->
+    <div class="section-heading fade-up" style="transition-delay:.3s">
+        <h3>Susunan Acara</h3>
+        <div class="section-heading-line"></div>
+    </div>
+
+    <div class="rundown-wrap fade-up" style="transition-delay:.35s">
+        <div class="timeline" id="rundownContainer"></div>
+    </div>
+
+    <!-- QR PRESENSI -->
+    <div class="qr-section fade-up" style="transition-delay:.4s">
+        <h3 class="qr-title">Tiket Digital Anda</h3>
+        <p class="qr-subtitle">Simpan dan tunjukkan QR Code ini kepada petugas registrasi saat tiba di lokasi acara.</p>
+        <div class="qr-frame">
+            <div id="qrcode"></div>
+        </div>
+        <p class="qr-id" id="waDisplay">—</p>
+    </div>
+
+    <!-- CONFIRMED VIEW -->
+    <div id="confirmedView">
+        <div class="confirmed-header">
+            <div class="confirmed-icon">✅</div>
+            <h3>Konfirmasi Diterima</h3>
+            <p>Terima kasih telah mengkonfirmasi kehadiran Anda</p>
+        </div>
+        <div class="confirmed-body">
+            <div class="status-row">
+                <div>
+                    <p class="status-label">Kehadiran Siswa</p>
+                    <p class="status-value" id="dispSiswa">—</p>
                 </div>
-                <p class="text-xs text-slate-400 mt-2" id="waDisplay">-</p>
+                <span class="status-badge" id="badgeSiswa"></span>
             </div>
+            <div class="status-row">
+                <div>
+                    <p class="status-label">Kehadiran Orang Tua / Wali</p>
+                    <p class="status-value" id="dispOrtu">—</p>
+                </div>
+                <span class="status-badge" id="badgeOrtu"></span>
+            </div>
+            <button class="btn-edit" id="btnEdit">✏️ &nbsp;Ubah Konfirmasi</button>
+        </div>
+    </div>
 
-            <!-- TAMPILAN ELEGAN: SUDAH KONFIRMASI -->
-            <div id="confirmedView" class="hidden bg-white rounded-2xl shadow-[0_0_40px_rgba(0,0,0,0.05)] border border-slate-100 p-6 mb-8 text-center">
-                <div class="inline-flex items-center justify-center w-12 h-12 bg-green-100 text-green-600 rounded-full mb-3 text-xl">✅</div>
-                <h3 class="font-bold text-xl text-primary mb-1">Sudah Konfirmasi</h3>
-                <p class="text-sm text-slate-500 mb-6">Berikut adalah status kehadiran Anda.</p>
-                
-                <div class="space-y-3 mb-6 text-left">
-                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                        <p class="text-xs text-slate-500 mb-1">Kehadiran Siswa</p>
-                        <p id="dispSiswa" class="font-bold text-slate-700">-</p>
-                    </div>
-                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                        <p class="text-xs text-slate-500 mb-1">Kehadiran Orang Tua/Wali</p>
-                        <p id="dispOrtu" class="font-bold text-slate-700">-</p>
+    <!-- FORM SECTION -->
+    <div id="formSection">
+        <div class="form-header">
+            <h3>Konfirmasi Kehadiran</h3>
+            <p>Mohon isi formulir ini untuk membantu kami<br>mempersiapkan tempat dan akomodasi dengan baik.</p>
+        </div>
+        <div class="form-body">
+            <form id="konfirmasiForm">
+                <div class="field-group">
+                    <label class="field-label">Kehadiran Siswa</label>
+                    <div class="radio-options">
+                        <label class="radio-option">
+                            <input type="radio" name="hadirSiswa" value="offline" required>
+                            <div class="radio-box">
+                                <div class="radio-circle"></div>
+                                <span class="radio-emoji">🏫</span>
+                                <span class="radio-text">Hadir Langsung di Lokasi</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="hadirSiswa" value="online">
+                            <div class="radio-box">
+                                <div class="radio-circle"></div>
+                                <span class="radio-emoji">💻</span>
+                                <span class="radio-text">Hadir Secara Online</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="hadirSiswa" value="tidak hadir">
+                            <div class="radio-box">
+                                <div class="radio-circle"></div>
+                                <span class="radio-emoji">🙏</span>
+                                <span class="radio-text">Berhalangan Hadir</span>
+                            </div>
+                        </label>
                     </div>
                 </div>
 
-                <button id="btnEdit" class="w-full bg-slate-100 text-primary font-bold py-3 rounded-xl hover:bg-slate-200 transition-all flex justify-center items-center">
-                    <span>Ubah Kehadiran</span>
+                <div class="field-group">
+                    <label class="field-label">Kehadiran Orang Tua / Wali</label>
+                    <div class="radio-options">
+                        <label class="radio-option">
+                            <input type="radio" name="hadirOrtu" value="offline" required>
+                            <div class="radio-box">
+                                <div class="radio-circle"></div>
+                                <span class="radio-emoji">🏫</span>
+                                <span class="radio-text">Hadir Langsung di Lokasi</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="hadirOrtu" value="online">
+                            <div class="radio-box">
+                                <div class="radio-circle"></div>
+                                <span class="radio-emoji">💻</span>
+                                <span class="radio-text">Hadir Secara Online</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="hadirOrtu" value="tidak hadir">
+                            <div class="radio-box">
+                                <div class="radio-circle"></div>
+                                <span class="radio-emoji">🙏</span>
+                                <span class="radio-text">Berhalangan Hadir</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit" id="btnSubmit" class="btn-submit">
+                    Kirim Konfirmasi Kehadiran
                 </button>
-            </div>
-
-            <!-- TAMPILAN FORM: BELUM KONFIRMASI / SEDANG EDIT -->
-            <div id="formSection" class="hidden bg-white rounded-2xl shadow-[0_0_40px_rgba(0,0,0,0.05)] border border-slate-100 p-6">
-                <h3 class="font-bold text-xl text-primary mb-1 text-center">Isi Konfirmasi</h3>
-                <p class="text-center text-sm text-slate-500 mb-6">Mohon isi untuk persiapan tempat.</p>
-                
-                <form id="konfirmasiForm" class="space-y-6">
-                    <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-3">Kehadiran Siswa</label>
-                        <div class="space-y-2">
-                            <label class="cursor-pointer block relative"><input type="radio" name="hadirSiswa" value="offline" class="peer sr-only" required><div class="rounded-xl border border-slate-200 p-4 transition-all hover:bg-slate-50 flex items-center"><div class="radio-dot w-5 h-5 rounded-full border-2 border-slate-300 mr-3 flex items-center justify-center"></div><span class="font-medium text-slate-700 text-sm">Hadir Offline</span></div></label>
-                            <label class="cursor-pointer block relative"><input type="radio" name="hadirSiswa" value="online" class="peer sr-only"><div class="rounded-xl border border-slate-200 p-4 transition-all hover:bg-slate-50 flex items-center"><div class="radio-dot w-5 h-5 rounded-full border-2 border-slate-300 mr-3 flex items-center justify-center"></div><span class="font-medium text-slate-700 text-sm">Hadir Online</span></div></label>
-                            <label class="cursor-pointer block relative"><input type="radio" name="hadirSiswa" value="tidak hadir" class="peer sr-only"><div class="rounded-xl border border-slate-200 p-4 transition-all hover:bg-slate-50 flex items-center"><div class="radio-dot w-5 h-5 rounded-full border-2 border-slate-300 mr-3 flex items-center justify-center"></div><span class="font-medium text-slate-700 text-sm">Tidak Hadir</span></div></label>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-3">Kehadiran Orang Tua / Wali</label>
-                        <div class="space-y-2">
-                            <label class="cursor-pointer block relative"><input type="radio" name="hadirOrtu" value="offline" class="peer sr-only" required><div class="rounded-xl border border-slate-200 p-4 transition-all hover:bg-slate-50 flex items-center"><div class="radio-dot w-5 h-5 rounded-full border-2 border-slate-300 mr-3 flex items-center justify-center"></div><span class="font-medium text-slate-700 text-sm">Hadir Offline</span></div></label>
-                            <label class="cursor-pointer block relative"><input type="radio" name="hadirOrtu" value="online" class="peer sr-only"><div class="rounded-xl border border-slate-200 p-4 transition-all hover:bg-slate-50 flex items-center"><div class="radio-dot w-5 h-5 rounded-full border-2 border-slate-300 mr-3 flex items-center justify-center"></div><span class="font-medium text-slate-700 text-sm">Hadir Online</span></div></label>
-                            <label class="cursor-pointer block relative"><input type="radio" name="hadirOrtu" value="tidak hadir" class="peer sr-only"><div class="rounded-xl border border-slate-200 p-4 transition-all hover:bg-slate-50 flex items-center"><div class="radio-dot w-5 h-5 rounded-full border-2 border-slate-300 mr-3 flex items-center justify-center"></div><span class="font-medium text-slate-700 text-sm">Tidak Hadir</span></div></label>
-                        </div>
-                    </div>
-
-                    <button type="submit" id="btnSubmit" class="w-full bg-primary text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-primary/30 transition-all">Kirim Konfirmasi</button>
-                    <button type="button" id="btnBatalEdit" class="hidden w-full text-slate-500 font-bold py-2 mt-2">Batal Edit</button>
-                </form>
-            </div>
-
+                <button type="button" id="btnBatalEdit" class="btn-cancel hidden">
+                    Batal — kembali ke halaman sebelumnya
+                </button>
+            </form>
         </div>
     </div>
 
-    <!-- JAVASCRIPT -->
-    <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbwTJyFpsaJxdeX4X5LlTvxwRuRMjJlfRA3jndQ_plqozqDkkncM4w8FndwZ_-iJQAj_/exec"; 
+    <!-- FOOTER -->
+    <div class="invite-footer fade-up">
+        <div class="footer-ornament">
+            <div class="footer-line"></div>
+            <span>✦</span>
+            <div class="footer-line"></div>
+        </div>
+        <div class="footer-logo">
+            <span class="footer-mono">AB</span>
+        </div>
+        <p class="footer-name">SMA Al-Azhar Syifa Budi Solo</p>
+        <p class="footer-sub">Surakarta · Jawa Tengah</p>
+        <p style="margin-top:20px;font-size:11px;color:#bbb">Wassalamu'alaikum Warahmatullahi Wabarakatuh</p>
+    </div>
 
-        const urlParams = new URLSearchParams(window.location.search);
-        const urlWa = urlParams.get('wa');
-        let namaSiswaGlobal = ""; 
+</div>
 
-        // Fungsi mengubah teks value radio button menjadi teks yang cantik
-        function formatTeksKehadiran(val) {
-            if(val === 'offline') return "Hadir Offline (di Lokasi)";
-            if(val === 'online') return "Hadir Online (Virtual Zoom/YT)";
-            return "Tidak Hadir";
+<!-- TOAST -->
+<div class="toast" id="toast">✅ Konfirmasi berhasil disimpan!</div>
+
+<script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbwTJyFpsaJxdeX4X5LlTvxwRuRMjJlfRA3jndQ_plqozqDkkncM4w8FndwZ_-iJQAj_/exec";
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlWa = urlParams.get('wa');
+    let namaSiswaGlobal = "";
+
+    /* ---- Helpers ---- */
+    function formatTeksKehadiran(val) {
+        if (val === 'offline') return "Hadir Langsung di Lokasi";
+        if (val === 'online')  return "Hadir Secara Online";
+        return "Berhalangan Hadir";
+    }
+
+    function badgeClass(val) {
+        if (val === 'offline') return 'badge-offline';
+        if (val === 'online')  return 'badge-online';
+        return 'badge-absent';
+    }
+
+    function badgeLabel(val) {
+        if (val === 'offline') return '🏫 Offline';
+        if (val === 'online')  return '💻 Online';
+        return '🙏 Tidak Hadir';
+    }
+
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 3500);
+    }
+
+    function showError(message) {
+        document.getElementById('preloader').classList.add('hidden');
+        const es = document.getElementById('errorScreen');
+        es.style.display = 'flex';
+        document.getElementById('errorText').textContent = message;
+    }
+
+    /* ---- Intersection Observer untuk fade-up ---- */
+    const fadeEls = document.querySelectorAll('.fade-up');
+    const io = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
+    }, { threshold: 0.12 });
+    fadeEls.forEach(el => io.observe(el));
+
+    /* ---- INIT ---- */
+    document.addEventListener('DOMContentLoaded', async () => {
+        if (!urlWa) {
+            showError("Tautan undangan tidak lengkap. Silakan hubungi pihak sekolah untuk mendapatkan tautan yang benar.");
+            return;
         }
 
-        document.addEventListener('DOMContentLoaded', async () => {
-            if (!urlWa) {
-                showError("Link undangan tidak lengkap (Parameter WA hilang).");
-                return;
+        try {
+            const response = await fetch(`${API_URL}?wa=${urlWa}`);
+            const data = await response.json();
+
+            if (data.status === "error") { showError(data.message); return; }
+
+            // Inject data
+            namaSiswaGlobal = data.siswa.nama;
+            document.getElementById('namaSiswaDisplay').textContent = data.siswa.nama;
+            document.getElementById('waDisplay').textContent = "ID Undangan: " + urlWa;
+            document.getElementById('tahunAjaran').textContent = data.info['Tahun Ajaran'];
+            document.getElementById('tanggalAcara').textContent = data.info['Hari'] + ", " + data.info['Tanggal'];
+            document.getElementById('waktuAcara').textContent = data.info['Jam mulai'] + " – " + data.info['Jam berakhir'];
+            document.getElementById('tempatAcara').textContent = data.info['Tempat'];
+            document.getElementById('dresscodeAcara').textContent = data.info['Dresscode'];
+
+            // QR Code
+            new QRCode(document.getElementById("qrcode"), {
+                text: urlWa, width: 160, height: 160,
+                colorDark: "#0f2240", colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+
+            // Rundown timeline
+            const container = document.getElementById('rundownContainer');
+            data.rundown.forEach(item => {
+                container.insertAdjacentHTML('beforeend', `
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <p class="timeline-time">${item.waktu}</p>
+                        <p class="timeline-event">${item.kegiatan}</p>
+                    </div>
+                `);
+            });
+
+            // Tampilkan status konfirmasi
+            if (data.konfirmasi) {
+                renderConfirmedView(data.konfirmasi.hadirSiswa, data.konfirmasi.hadirOrtu);
+                // Pre-check radio buttons
+                document.querySelector(`input[name="hadirSiswa"][value="${data.konfirmasi.hadirSiswa}"]`).checked = true;
+                document.querySelector(`input[name="hadirOrtu"][value="${data.konfirmasi.hadirOrtu}"]`).checked = true;
+                document.getElementById('btnSubmit').textContent = "Perbarui Konfirmasi Kehadiran";
+                document.getElementById('btnBatalEdit').classList.remove('hidden');
+            } else {
+                document.getElementById('formSection').style.display = 'block';
             }
 
-            try {
-                const response = await fetch(`${API_URL}?wa=${urlWa}`);
-                const data = await response.json();
+            // Show app
+            setTimeout(() => {
+                document.getElementById('preloader').classList.add('hidden');
+                const app = document.getElementById('app');
+                app.style.display = 'block';
+                void app.offsetWidth;
+                app.style.opacity = '1';
+            }, 800);
 
-                if (data.status === "error") {
-                    showError(data.message);
-                    return;
-                }
-
-                // Inject Data
-                namaSiswaGlobal = data.siswa.nama;
-                document.getElementById('namaSiswaDisplay').textContent = data.siswa.nama;
-                document.getElementById('waDisplay').textContent = "ID: " + urlWa;
-                
-                document.getElementById('tahunAjaran').textContent = "Tahun Ajaran " + data.info['Tahun Ajaran'];
-                document.getElementById('tanggalAcara').textContent = data.info['Hari'] + ", " + data.info['Tanggal'];
-                document.getElementById('waktuAcara').textContent = data.info['Jam mulai'] + " - " + data.info['Jam berakhir'];
-                document.getElementById('tempatAcara').textContent = data.info['Tempat'];
-                // MUNCULKAN DRESSCODE
-                document.getElementById('dresscodeAcara').textContent = data.info['Dresscode'];
-
-                new QRCode(document.getElementById("qrcode"), {
-                    text: urlWa, width: 150, height: 150,
-                    colorDark : "#1e3a8a", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H
-                });
-
-                const rundownContainer = document.getElementById('rundownContainer');
-                data.rundown.forEach(item => {
-                    rundownContainer.insertAdjacentHTML('beforeend', `
-                        <div class="flex items-center bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
-                            <span class="font-bold text-primary w-20 text-sm shrink-0">${item.waktu}</span>
-                            <span class="text-slate-600 text-sm ml-2">${item.kegiatan}</span>
-                        </div>
-                    `);
-                });
-
-                // LOGIKA TAMPILAN KONFIRMASI
-                if (data.konfirmasi) {
-                    // Berarti sudah pernah isi, Tampilkan Tampilan Elegan
-                    document.getElementById('confirmedView').classList.remove('hidden');
-                    
-                    document.getElementById('dispSiswa').textContent = formatTeksKehadiran(data.konfirmasi.hadirSiswa);
-                    document.getElementById('dispOrtu').textContent = formatTeksKehadiran(data.konfirmasi.hadirOrtu);
-                    
-                    // Centang radio button otomatis (untuk persiapan jika klik edit)
-                    document.querySelector(`input[name="hadirSiswa"][value="${data.konfirmasi.hadirSiswa}"]`).checked = true;
-                    document.querySelector(`input[name="hadirOrtu"][value="${data.konfirmasi.hadirOrtu}"]`).checked = true;
-                    
-                    // Ubah tombol submit menjadi update
-                    document.getElementById('btnSubmit').textContent = "Update Konfirmasi";
-                    document.getElementById('btnBatalEdit').classList.remove('hidden'); // Munculkan tombol batal
-                } else {
-                    // Belum pernah ngisi, tampilkan Form langsung
-                    document.getElementById('formSection').classList.remove('hidden');
-                }
-
-                setTimeout(() => {
-                    document.getElementById('preloader').style.display = 'none';
-                    const app = document.getElementById('app');
-                    app.classList.remove('hidden');
-                    void app.offsetWidth; 
-                    app.classList.remove('opacity-0');
-                }, 500);
-
-            } catch (error) {
-                showError("Gagal terhubung ke server. Silakan coba beberapa saat lagi.");
-            }
-        });
-
-        // Event Listener untuk tombol Edit di Mode Elegan
-        document.getElementById('btnEdit').addEventListener('click', () => {
-            document.getElementById('confirmedView').classList.add('hidden');
-            document.getElementById('formSection').classList.remove('hidden');
-        });
-
-        // Event Listener untuk tombol Batal Edit
-        document.getElementById('btnBatalEdit').addEventListener('click', () => {
-            document.getElementById('formSection').classList.add('hidden');
-            document.getElementById('confirmedView').classList.remove('hidden');
-        });
-
-        function showError(message) {
-            document.getElementById('preloader').style.display = 'none';
-            document.getElementById('errorScreen').classList.remove('hidden');
-            document.getElementById('errorText').textContent = message;
+        } catch (err) {
+            showError("Gagal terhubung ke server. Mohon periksa koneksi internet Anda dan coba kembali.");
         }
+    });
 
-        // SUBMIT FORM KE SPREADSHEET
-        document.getElementById('konfirmasiForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btnSubmit = document.getElementById('btnSubmit');
-            const teksLama = btnSubmit.textContent;
-            btnSubmit.disabled = true;
-            btnSubmit.textContent = 'Menyimpan...';
+    function renderConfirmedView(valSiswa, valOrtu) {
+        document.getElementById('confirmedView').style.display = 'block';
+        document.getElementById('formSection').style.display = 'none';
 
-            const valSiswa = document.querySelector('input[name="hadirSiswa"]:checked').value;
-            const valOrtu = document.querySelector('input[name="hadirOrtu"]:checked').value;
+        document.getElementById('dispSiswa').textContent = formatTeksKehadiran(valSiswa);
+        document.getElementById('dispOrtu').textContent  = formatTeksKehadiran(valOrtu);
 
-            const payload = {
-                namaSiswa: namaSiswaGlobal,
-                wa: urlWa,
-                kehadiranSiswa: valSiswa,
-                kehadiranOrtu: valOrtu
-            };
+        const bs = document.getElementById('badgeSiswa');
+        bs.textContent = badgeLabel(valSiswa);
+        bs.className = 'status-badge ' + badgeClass(valSiswa);
 
-            try {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    body: JSON.stringify(payload),
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
-                });
+        const bo = document.getElementById('badgeOrtu');
+        bo.textContent = badgeLabel(valOrtu);
+        bo.className = 'status-badge ' + badgeClass(valOrtu);
+    }
 
-                const result = await response.json();
-                if(result.status === "success") {
-                    // Update tampilan elegan secara realtime dengan data baru
-                    document.getElementById('dispSiswa').textContent = formatTeksKehadiran(valSiswa);
-                    document.getElementById('dispOrtu').textContent = formatTeksKehadiran(valOrtu);
-                    
-                    // Kembalikan ke tampilan elegan
-                    document.getElementById('formSection').classList.add('hidden');
-                    document.getElementById('confirmedView').classList.remove('hidden');
-                    
-                    // Atur UI form untuk mode Update
-                    document.getElementById('btnSubmit').textContent = "Update Konfirmasi";
-                    document.getElementById('btnBatalEdit').classList.remove('hidden');
-                    
-                    alert("Sip! Data kehadiran Anda berhasil disimpan.");
-                } else {
-                    alert("Gagal: " + result.message);
-                }
-            } catch (error) {
-                alert("Kesalahan jaringan. Silakan coba lagi.");
-            } finally {
-                btnSubmit.disabled = false;
-                if(btnSubmit.textContent === 'Menyimpan...') btnSubmit.textContent = teksLama;
+    // Edit button
+    document.getElementById('btnEdit').addEventListener('click', () => {
+        document.getElementById('confirmedView').style.display = 'none';
+        document.getElementById('formSection').style.display = 'block';
+        document.getElementById('formSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    // Cancel edit
+    document.getElementById('btnBatalEdit').addEventListener('click', () => {
+        document.getElementById('formSection').style.display = 'none';
+        document.getElementById('confirmedView').style.display = 'block';
+    });
+
+    // Submit
+    document.getElementById('konfirmasiForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('btnSubmit');
+        btn.disabled = true;
+        btn.textContent = 'Menyimpan…';
+
+        const valSiswa = document.querySelector('input[name="hadirSiswa"]:checked').value;
+        const valOrtu  = document.querySelector('input[name="hadirOrtu"]:checked').value;
+
+        const payload = { namaSiswa: namaSiswaGlobal, wa: urlWa, kehadiranSiswa: valSiswa, kehadiranOrtu: valOrtu };
+
+        try {
+            const res = await fetch(API_URL, {
+                method: 'POST',
+                body: JSON.stringify(payload),
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+            });
+            const result = await res.json();
+            if (result.status === "success") {
+                renderConfirmedView(valSiswa, valOrtu);
+                btn.textContent = "Perbarui Konfirmasi Kehadiran";
+                showToast('✅ Konfirmasi Anda berhasil disimpan!');
+            } else {
+                showToast('⚠️ Gagal: ' + result.message);
             }
-        });
-    </script>
+        } catch {
+            showToast('⚠️ Kesalahan jaringan. Silakan coba lagi.');
+        } finally {
+            btn.disabled = false;
+            if (btn.textContent === 'Menyimpan…') btn.textContent = "Perbarui Konfirmasi Kehadiran";
+        }
+    });
+</script>
 </body>
 </html>
