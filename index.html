@@ -17,7 +17,6 @@
             }
         }
     </script>
-    <!-- Library QR Code -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <style>
@@ -31,22 +30,18 @@
 </head>
 <body class="antialiased text-slate-800 relative">
 
-    <!-- PRELOADER -->
     <div id="preloader" class="fixed inset-0 z-50 bg-white flex flex-col items-center justify-center transition-opacity duration-700">
         <h2 class="font-serif text-3xl text-primary font-bold">SMA ABBS</h2>
         <p class="text-slate-500 mt-2 animate-pulse text-sm">Menyiapkan Undangan Anda...</p>
     </div>
 
-    <!-- ERROR SCREEN (Jika WA tidak valid) -->
     <div id="errorScreen" class="fixed inset-0 z-40 bg-white flex flex-col items-center justify-center hidden">
         <h2 class="font-bold text-xl text-red-600 mb-2">Undangan Tidak Ditemukan</h2>
         <p id="errorText" class="text-slate-500 text-center px-6">Pastikan link yang Anda buka sudah benar.</p>
     </div>
 
-    <!-- MAIN APP -->
     <div id="app" class="max-w-md mx-auto min-h-screen bg-white shadow-2xl relative hidden opacity-0 transition-opacity duration-1000">
         
-        <!-- Header Image -->
         <div class="relative w-full h-48 bg-primary rounded-b-[2.5rem] shadow-md overflow-hidden">
             <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/arabesque.png')] opacity-20"></div>
             <div class="absolute inset-0 flex flex-col items-center justify-center text-center p-6 text-white z-10">
@@ -57,7 +52,6 @@
         </div>
 
         <div class="px-6 py-8">
-            <!-- Greeting Section -->
             <div class="text-center mb-8">
                 <p class="text-slate-500 text-sm">Kepada Yth.</p>
                 <h2 id="namaSiswaDisplay" class="text-2xl font-bold text-primary mt-1 mb-1">-</h2>
@@ -65,43 +59,33 @@
                 <div class="w-12 h-1 bg-gold mx-auto mt-4 rounded-full"></div>
             </div>
 
-            <!-- Event Details -->
             <div class="bg-slate-50 rounded-2xl p-5 border border-slate-100 shadow-sm mb-8">
                 <h3 class="font-semibold text-lg mb-4 text-primary">Informasi Acara</h3>
                 <ul class="space-y-4">
                     <li class="flex items-start">
                         <span class="bg-blue-100 text-primary p-2 rounded-lg mr-3">📅</span>
-                        <div>
-                            <p class="text-xs text-slate-500">Tanggal</p>
-                            <p id="tanggalAcara" class="font-medium">-</p>
-                        </div>
+                        <div><p class="text-xs text-slate-500">Tanggal</p><p id="tanggalAcara" class="font-medium">-</p></div>
                     </li>
                     <li class="flex items-start">
                         <span class="bg-blue-100 text-primary p-2 rounded-lg mr-3">⏰</span>
-                        <div>
-                            <p class="text-xs text-slate-500">Waktu</p>
-                            <p class="font-medium"><span id="waktuAcara">-</span> WIB</p>
-                        </div>
+                        <div><p class="text-xs text-slate-500">Waktu</p><p class="font-medium"><span id="waktuAcara">-</span> WIB</p></div>
                     </li>
                     <li class="flex items-start">
                         <span class="bg-blue-100 text-primary p-2 rounded-lg mr-3">📍</span>
-                        <div>
-                            <p class="text-xs text-slate-500">Tempat</p>
-                            <p id="tempatAcara" class="font-medium">-</p>
-                        </div>
+                        <div><p class="text-xs text-slate-500">Tempat</p><p id="tempatAcara" class="font-medium">-</p></div>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="bg-blue-100 text-primary p-2 rounded-lg mr-3">👔</span>
+                        <div><p class="text-xs text-slate-500">Dresscode</p><p id="dresscodeAcara" class="font-medium">-</p></div>
                     </li>
                 </ul>
             </div>
 
-            <!-- Rundown -->
             <div class="mb-8">
                 <h3 class="font-semibold text-lg mb-4 text-primary">Rundown Acara</h3>
-                <div id="rundownContainer" class="space-y-3">
-                    <!-- Injected by JS -->
-                </div>
+                <div id="rundownContainer" class="space-y-3"></div>
             </div>
 
-            <!-- QR Code -->
             <div class="mb-8 text-center bg-white p-6 rounded-2xl border-2 border-dashed border-slate-200">
                 <h3 class="font-semibold text-lg text-primary mb-2">QR Code Presensi</h3>
                 <p class="text-sm text-slate-500 mb-4">Tunjukkan kode ini saat registrasi</p>
@@ -111,9 +95,31 @@
                 <p class="text-xs text-slate-400 mt-2" id="waDisplay">-</p>
             </div>
 
-            <!-- Form Konfirmasi -->
-            <div id="formSection" class="bg-white rounded-2xl shadow-[0_0_40px_rgba(0,0,0,0.05)] border border-slate-100 p-6">
-                <h3 class="font-bold text-xl text-primary mb-1 text-center">Konfirmasi Kehadiran</h3>
+            <!-- TAMPILAN ELEGAN: SUDAH KONFIRMASI -->
+            <div id="confirmedView" class="hidden bg-white rounded-2xl shadow-[0_0_40px_rgba(0,0,0,0.05)] border border-slate-100 p-6 mb-8 text-center">
+                <div class="inline-flex items-center justify-center w-12 h-12 bg-green-100 text-green-600 rounded-full mb-3 text-xl">✅</div>
+                <h3 class="font-bold text-xl text-primary mb-1">Sudah Konfirmasi</h3>
+                <p class="text-sm text-slate-500 mb-6">Berikut adalah status kehadiran Anda.</p>
+                
+                <div class="space-y-3 mb-6 text-left">
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                        <p class="text-xs text-slate-500 mb-1">Kehadiran Siswa</p>
+                        <p id="dispSiswa" class="font-bold text-slate-700">-</p>
+                    </div>
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                        <p class="text-xs text-slate-500 mb-1">Kehadiran Orang Tua/Wali</p>
+                        <p id="dispOrtu" class="font-bold text-slate-700">-</p>
+                    </div>
+                </div>
+
+                <button id="btnEdit" class="w-full bg-slate-100 text-primary font-bold py-3 rounded-xl hover:bg-slate-200 transition-all flex justify-center items-center">
+                    <span>Ubah Kehadiran</span>
+                </button>
+            </div>
+
+            <!-- TAMPILAN FORM: BELUM KONFIRMASI / SEDANG EDIT -->
+            <div id="formSection" class="hidden bg-white rounded-2xl shadow-[0_0_40px_rgba(0,0,0,0.05)] border border-slate-100 p-6">
+                <h3 class="font-bold text-xl text-primary mb-1 text-center">Isi Konfirmasi</h3>
                 <p class="text-center text-sm text-slate-500 mb-6">Mohon isi untuk persiapan tempat.</p>
                 
                 <form id="konfirmasiForm" class="space-y-6">
@@ -136,14 +142,8 @@
                     </div>
 
                     <button type="submit" id="btnSubmit" class="w-full bg-primary text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-primary/30 transition-all">Kirim Konfirmasi</button>
+                    <button type="button" id="btnBatalEdit" class="hidden w-full text-slate-500 font-bold py-2 mt-2">Batal Edit</button>
                 </form>
-            </div>
-
-            <!-- Pesan Sukses -->
-            <div id="successMessage" class="hidden bg-green-50 border border-green-200 rounded-2xl p-6 text-center">
-                <div class="text-4xl mb-2">✅</div>
-                <h3 class="font-bold text-xl text-green-800 mb-2">Terima Kasih!</h3>
-                <p class="text-green-600 text-sm">Konfirmasi Anda telah tersimpan.</p>
             </div>
 
         </div>
@@ -151,13 +151,18 @@
 
     <!-- JAVASCRIPT -->
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbwEAtGqCErSAixIV7Swkq57Ru4KSJoulAF0l_lKddyJxONvq04rPU4UOwy4nl6W75HB/exec"; 
+        const API_URL = "https://script.google.com/macros/s/AKfycbwTJyFpsaJxdeX4X5LlTvxwRuRMjJlfRA3jndQ_plqozqDkkncM4w8FndwZ_-iJQAj_/exec"; 
 
-        // Mengambil parameter '?wa=' dari URL
         const urlParams = new URLSearchParams(window.location.search);
         const urlWa = urlParams.get('wa');
-        
-        let namaSiswaGlobal = ""; // Untuk menyimpan nama siswa saat form disubmit
+        let namaSiswaGlobal = ""; 
+
+        // Fungsi mengubah teks value radio button menjadi teks yang cantik
+        function formatTeksKehadiran(val) {
+            if(val === 'offline') return "Hadir Offline (di Lokasi)";
+            if(val === 'online') return "Hadir Online (Virtual Zoom/YT)";
+            return "Tidak Hadir";
+        }
 
         document.addEventListener('DOMContentLoaded', async () => {
             if (!urlWa) {
@@ -166,7 +171,6 @@
             }
 
             try {
-                // Panggil API Spreadsheet
                 const response = await fetch(`${API_URL}?wa=${urlWa}`);
                 const data = await response.json();
 
@@ -175,26 +179,23 @@
                     return;
                 }
 
-                // 1. Tampilkan Data Siswa
+                // Inject Data
                 namaSiswaGlobal = data.siswa.nama;
                 document.getElementById('namaSiswaDisplay').textContent = data.siswa.nama;
                 document.getElementById('waDisplay').textContent = "ID: " + urlWa;
-
-                // 2. Generate QR Code
-                new QRCode(document.getElementById("qrcode"), {
-                    text: urlWa,
-                    width: 150, height: 150,
-                    colorDark : "#1e3a8a", colorLight : "#ffffff",
-                    correctLevel : QRCode.CorrectLevel.H
-                });
-
-                // 3. Tampilkan Data Acara (INFO)
+                
                 document.getElementById('tahunAjaran').textContent = "Tahun Ajaran " + data.info['Tahun Ajaran'];
                 document.getElementById('tanggalAcara').textContent = data.info['Hari'] + ", " + data.info['Tanggal'];
                 document.getElementById('waktuAcara').textContent = data.info['Jam mulai'] + " - " + data.info['Jam berakhir'];
                 document.getElementById('tempatAcara').textContent = data.info['Tempat'];
+                // MUNCULKAN DRESSCODE
+                document.getElementById('dresscodeAcara').textContent = data.info['Dresscode'];
 
-                // 4. Render Rundown
+                new QRCode(document.getElementById("qrcode"), {
+                    text: urlWa, width: 150, height: 150,
+                    colorDark : "#1e3a8a", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H
+                });
+
                 const rundownContainer = document.getElementById('rundownContainer');
                 data.rundown.forEach(item => {
                     rundownContainer.insertAdjacentHTML('beforeend', `
@@ -205,18 +206,49 @@
                     `);
                 });
 
-                // 5. Hilangkan Loading, Tampilkan Undangan
+                // LOGIKA TAMPILAN KONFIRMASI
+                if (data.konfirmasi) {
+                    // Berarti sudah pernah isi, Tampilkan Tampilan Elegan
+                    document.getElementById('confirmedView').classList.remove('hidden');
+                    
+                    document.getElementById('dispSiswa').textContent = formatTeksKehadiran(data.konfirmasi.hadirSiswa);
+                    document.getElementById('dispOrtu').textContent = formatTeksKehadiran(data.konfirmasi.hadirOrtu);
+                    
+                    // Centang radio button otomatis (untuk persiapan jika klik edit)
+                    document.querySelector(`input[name="hadirSiswa"][value="${data.konfirmasi.hadirSiswa}"]`).checked = true;
+                    document.querySelector(`input[name="hadirOrtu"][value="${data.konfirmasi.hadirOrtu}"]`).checked = true;
+                    
+                    // Ubah tombol submit menjadi update
+                    document.getElementById('btnSubmit').textContent = "Update Konfirmasi";
+                    document.getElementById('btnBatalEdit').classList.remove('hidden'); // Munculkan tombol batal
+                } else {
+                    // Belum pernah ngisi, tampilkan Form langsung
+                    document.getElementById('formSection').classList.remove('hidden');
+                }
+
                 setTimeout(() => {
                     document.getElementById('preloader').style.display = 'none';
                     const app = document.getElementById('app');
                     app.classList.remove('hidden');
-                    void app.offsetWidth; // Paksa render
+                    void app.offsetWidth; 
                     app.classList.remove('opacity-0');
                 }, 500);
 
             } catch (error) {
                 showError("Gagal terhubung ke server. Silakan coba beberapa saat lagi.");
             }
+        });
+
+        // Event Listener untuk tombol Edit di Mode Elegan
+        document.getElementById('btnEdit').addEventListener('click', () => {
+            document.getElementById('confirmedView').classList.add('hidden');
+            document.getElementById('formSection').classList.remove('hidden');
+        });
+
+        // Event Listener untuk tombol Batal Edit
+        document.getElementById('btnBatalEdit').addEventListener('click', () => {
+            document.getElementById('formSection').classList.add('hidden');
+            document.getElementById('confirmedView').classList.remove('hidden');
         });
 
         function showError(message) {
@@ -229,14 +261,18 @@
         document.getElementById('konfirmasiForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btnSubmit = document.getElementById('btnSubmit');
+            const teksLama = btnSubmit.textContent;
             btnSubmit.disabled = true;
-            btnSubmit.textContent = 'Mengirim...';
+            btnSubmit.textContent = 'Menyimpan...';
+
+            const valSiswa = document.querySelector('input[name="hadirSiswa"]:checked').value;
+            const valOrtu = document.querySelector('input[name="hadirOrtu"]:checked').value;
 
             const payload = {
                 namaSiswa: namaSiswaGlobal,
                 wa: urlWa,
-                kehadiranSiswa: document.querySelector('input[name="hadirSiswa"]:checked').value,
-                kehadiranOrtu: document.querySelector('input[name="hadirOrtu"]:checked').value
+                kehadiranSiswa: valSiswa,
+                kehadiranOrtu: valOrtu
             };
 
             try {
@@ -248,17 +284,27 @@
 
                 const result = await response.json();
                 if(result.status === "success") {
+                    // Update tampilan elegan secara realtime dengan data baru
+                    document.getElementById('dispSiswa').textContent = formatTeksKehadiran(valSiswa);
+                    document.getElementById('dispOrtu').textContent = formatTeksKehadiran(valOrtu);
+                    
+                    // Kembalikan ke tampilan elegan
                     document.getElementById('formSection').classList.add('hidden');
-                    document.getElementById('successMessage').classList.remove('hidden');
+                    document.getElementById('confirmedView').classList.remove('hidden');
+                    
+                    // Atur UI form untuk mode Update
+                    document.getElementById('btnSubmit').textContent = "Update Konfirmasi";
+                    document.getElementById('btnBatalEdit').classList.remove('hidden');
+                    
+                    alert("Sip! Data kehadiran Anda berhasil disimpan.");
                 } else {
                     alert("Gagal: " + result.message);
-                    btnSubmit.disabled = false;
-                    btnSubmit.textContent = 'Kirim Konfirmasi';
                 }
             } catch (error) {
                 alert("Kesalahan jaringan. Silakan coba lagi.");
+            } finally {
                 btnSubmit.disabled = false;
-                btnSubmit.textContent = 'Kirim Konfirmasi';
+                if(btnSubmit.textContent === 'Menyimpan...') btnSubmit.textContent = teksLama;
             }
         });
     </script>
