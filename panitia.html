@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Scanner Panitia - SMA ABBS</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Tailwind untuk kemudahan layout panel admin -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.4/html5-qrcode.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        maroon: '#800000',
+                        maroondark: '#5c0000',
+                        bluelight: '#89CFF0',
+                    },
+                    fontFamily: { sans: ['"DM Sans"', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #f4f6f8; }
+        /* Style override untuk library QR Code agar rapi di mobile */
+        #reader { width: 100%; border-radius: 12px; overflow: hidden; border: none !important; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        #reader__dashboard_section_csr span { display: none !important; }
+        #reader__dashboard_section_swaplink { text-decoration: none !important; color: #800000 !important; font-weight: 600; }
+        #reader button { background-color: #800000 !important; color: white !important; border: none !important; padding: 8px 16px !important; border-radius: 8px !important; font-weight: 600 !important; cursor: pointer; margin-bottom: 10px; }
+        
+        /* Toggle Switch Checkbox CSS */
+        .toggle-checkbox:checked { right: 0; border-color: #800000; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #800000; }
+        .toggle-checkbox { right: 0; z-index: 1; border-color: #e2e8f0; transition: all 0.3s; }
+        .toggle-label { width: 3rem; height: 1.5rem; background-color: #cbd5e1; border-radius: 9999px; transition: all 0.3s; }
+        .toggle-circle { width: 1.25rem; height: 1.25rem; background-color: white; border-radius: 50%; top: 0.125rem; left: 0.125rem; transition: all 0.3s; }
+        .toggle-checkbox:checked ~ .toggle-circle { transform: translateX(1.5rem); }
+    </style>
+</head>
+<body class="antialiased text-slate-800 pb-20">
+
+    <!-- Header Panel -->
+    <div class="bg-gradient-to-r from-maroon to-maroondark text-white p-4 sticky top-0 z-40 shadow-md">
+        <div class="max-w-md mx-auto flex items-center gap-3">
+            <div class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center border border-white/30">
+                <span class="font-bold text-bluelight text-sm">AB</span>
+            </div>
+            <div>
+                <h1 class="font-bold text-lg leading-tight">Panel Panitia</h1>
+                <p class="text-xs text-white/70">Awwalussanah SMA ABBS</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="bg-white shadow-sm sticky top-[72px] z-30">
+        <div class="max-w-md mx-auto flex text-sm font-semibold">
+            <button id="btnTabScan" class="flex-1 py-3 border-b-2 border-maroon text-maroon text-center transition-colors">
+                📷 Scanner
+            </button>
+            <button id="btnTabRekap" class="flex-1 py-3 border-b-2 border-transparent text-slate-400 text-center transition-colors">
+                📋 Daftar Hadir
+            </button>
+        </div>
+    </div>
+
+    <main class="max-w-md mx-auto p-4">
+        
+        <!-- ==================== TAB SCANNER ==================== -->
+        <div id="tabScan" class="block space-y-4">
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+                <p class="text-center text-sm text-slate-500 mb-4">Arahkan kamera ke QR Code milik tamu undangan.</p>
+                <!-- Area Kamera QR -->
+                <div id="reader"></div>
+            </div>
+        </div>
+
+        <!-- ==================== TAB REKAP ==================== -->
+        <div id="tabRekap" class="hidden space-y-4">
+            <div class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-slate-100">
+                <div>
+                    <h2 class="font-bold text-maroon">Total Kehadiran Hari Ini</h2>
+                    <p class="text-xs text-slate-500" id="lastSync">Sinkronisasi terakhir: -</p>
+                </div>
+                <button onclick="loadRekap()" class="w-10 h-10 bg-bluelight/20 text-maroon rounded-full flex items-center justify-center hover:bg-bluelight/40 transition">
+                    🔄
+                </button>
+            </div>
+
+            <!-- List Rekap akan di-inject ke sini -->
+            <div id="rekapContainer" class="space-y-3">
+                <!-- Data kosong -->
+                <p class="text-center text-sm text-slate-400 py-10">Memuat data kehadiran...</p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- ==================== MODAL HASIL SCAN ==================== -->
+    <div id="scanModal" class="fixed inset-0 bg-slate-900/60 z-50 flex flex-col justify-end md:justify-center items-center hidden opacity-0 transition-opacity">
+        <div class="bg-white w-full max-w-md md:rounded-2xl rounded-t-3xl p-6 transform translate-y-full md:translate-y-0 transition-transform duration-300" id="scanModalBox">
+            
+            <div class="flex justify-between items-start mb-4 border-b border-slate-100 pb-4">
+                <div>
+                    <span class="inline-block px-2 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-md mb-2">QR Valid</span>
+                    <h2 id="modalNamaSiswa" class="text-xl font-bold text-maroon leading-tight">Nama Siswa</h2>
+                    <p id="modalId" class="text-xs text-slate-500 font-mono mt-1">ID: 123456</p>
+                </div>
+            </div>
+
+            <!-- Info Rencana Kehadiran dari Spreadsheet -->
+            <div class="bg-slate-50 rounded-xl p-3 border border-slate-100 mb-5">
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Rencana Kehadiran (Konfirmasi):</p>
+                <div class="flex justify-between text-sm">
+                    <span class="text-slate-600">Siswa: <strong id="rencanaSiswa" class="text-slate-800">-</strong></span>
+                    <span class="text-slate-600">Ortu: <strong id="rencanaOrtu" class="text-slate-800">-</strong></span>
+                </div>
+            </div>
+
+            <h3 class="font-bold text-slate-700 mb-3">Tandai Kehadiran (Check-in):</h3>
+            
+            <form id="checkinForm" class="space-y-4">
+                <!-- Toggle Siswa -->
+                <div class="flex items-center justify-between p-3 border border-slate-200 rounded-xl">
+                    <span class="font-semibold text-slate-700">Siswa Datang</span>
+                    <div class="relative inline-block w-12 mr-2 align-middle select-none">
+                        <input type="checkbox" name="checkSiswa" id="checkSiswa" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                        <label for="checkSiswa" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+                        <div class="toggle-circle absolute pointer-events-none"></div>
+                    </div>
+                </div>
+
+                <!-- Toggle Ortu -->
+                <div class="flex items-center justify-between p-3 border border-slate-200 rounded-xl">
+                    <span class="font-semibold text-slate-700">Orang Tua / Wali Datang</span>
+                    <div class="relative inline-block w-12 mr-2 align-middle select-none">
+                        <input type="checkbox" name="checkOrtu" id="checkOrtu" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                        <label for="checkOrtu" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+                        <div class="toggle-circle absolute pointer-events-none"></div>
+                    </div>
+                </div>
+
+                <div class="flex gap-3 pt-4">
+                    <button type="button" onclick="closeModal()" class="flex-1 py-3 font-semibold text-slate-500 bg-slate-100 hover:bg-slate-200 rounded-xl transition">Batal</button>
+                    <button type="submit" id="btnSaveCheckin" class="flex-1 py-3 font-semibold text-white bg-maroon hover:bg-maroondark rounded-xl transition shadow-lg shadow-maroon/30">Simpan Data</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+    <!-- Alert Loading (Full Screen) -->
+    <div id="loadingScreen" class="fixed inset-0 bg-white/80 backdrop-blur-sm z-[60] flex flex-col items-center justify-center hidden">
+        <div class="animate-spin rounded-full h-12 w-12 border-4 border-slate-200 border-t-maroon mb-3"></div>
+        <p class="text-maroon font-semibold" id="loadingText">Mencari data...</p>
+    </div>
+
+    <script>
+        const API_URL = "https://script.google.com/macros/s/AKfycbzxCt_v9Q6FuYoDicPT86FmueL87FhalCVcA8Zh4o7OQgp787spfOVioxMhJQwo4Q4y/exec"; 
+        
+        let html5QrcodeScanner;
+        let currentWaScanned = "";
+        let currentNamaScanned = "";
+
+        // ==========================================
+        // TAB NAVIGATION LOGIC
+        // ==========================================
+        const btnScan = document.getElementById('btnTabScan');
+        const btnRekap = document.getElementById('btnTabRekap');
+        const tabScan = document.getElementById('tabScan');
+        const tabRekap = document.getElementById('tabRekap');
+
+        btnScan.addEventListener('click', () => {
+            btnScan.className = "flex-1 py-3 border-b-2 border-maroon text-maroon text-center transition-colors";
+            btnRekap.className = "flex-1 py-3 border-b-2 border-transparent text-slate-400 text-center transition-colors";
+            tabScan.classList.remove('hidden');
+            tabRekap.classList.add('hidden');
+        });
+
+        btnRekap.addEventListener('click', () => {
+            btnRekap.className = "flex-1 py-3 border-b-2 border-maroon text-maroon text-center transition-colors";
+            btnScan.className = "flex-1 py-3 border-b-2 border-transparent text-slate-400 text-center transition-colors";
+            tabScan.classList.add('hidden');
+            tabRekap.classList.remove('hidden');
+            loadRekap(); // Tarik data terbaru saat tab dibuka
+        });
+
+        // ==========================================
+        // QR SCANNER LOGIC
+        // ==========================================
+        function onScanSuccess(decodedText, decodedResult) {
+            // Jeda scanner sementara saat modal terbuka
+            if(html5QrcodeScanner) html5QrcodeScanner.pause(true);
+            currentWaScanned = decodedText;
+            fetchDataSiswa(decodedText);
+        }
+
+        function initScanner() {
+            html5QrcodeScanner = new Html5QrcodeScanner("reader", { 
+                fps: 10, 
+                qrbox: { width: 250, height: 250 },
+                aspectRatio: 1.0,
+                showTorchButtonIfSupported: true
+            }, false);
+            html5QrcodeScanner.render(onScanSuccess);
+        }
+
+        // ==========================================
+        // FETCH DATA & MODAL LOGIC
+        // ==========================================
+        async function fetchDataSiswa(wa) {
+            showLoading("Mencari data kehadiran...");
+            try {
+                const res = await fetch(`${API_URL}?wa=${wa}`);
+                const data = await res.json();
+                hideLoading();
+
+                if(data.status === "error") {
+                    alert("Gagal: " + data.message);
+                    if(html5QrcodeScanner) html5QrcodeScanner.resume();
+                    return;
+                }
+
+                currentNamaScanned = data.siswa.nama;
+                
+                // Isi Info ke Modal
+                document.getElementById('modalNamaSiswa').textContent = data.siswa.nama;
+                document.getElementById('modalId').textContent = "WA/ID: " + wa;
+
+                // Tampilkan rencana konfirmasi dari sheet KONFIRMASI (Bantu panitia mengingat)
+                document.getElementById('rencanaSiswa').textContent = data.konfirmasi ? data.konfirmasi.hadirSiswa : "Belum Isi";
+                document.getElementById('rencanaOrtu').textContent  = data.konfirmasi ? data.konfirmasi.hadirOrtu : "Belum Isi";
+
+                // SET CHECKBOX STATUS (Jika sebelumnya sudah discan, centang otomatis)
+                const chkSiswa = document.getElementById('checkSiswa');
+                const chkOrtu = document.getElementById('checkOrtu');
+                
+                if (data.checkin) {
+                    chkSiswa.checked = (data.checkin.siswaHadir === "HADIR");
+                    chkOrtu.checked = (data.checkin.ortuHadir === "HADIR");
+                } else {
+                    chkSiswa.checked = false;
+                    chkOrtu.checked = false;
+                }
+
+                openModal();
+
+            } catch (err) {
+                hideLoading();
+                alert("Koneksi gagal. Cek internet Anda.");
+                if(html5QrcodeScanner) html5QrcodeScanner.resume();
+            }
+        }
+
+        document.getElementById('checkinForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btnSave = document.getElementById('btnSaveCheckin');
+            btnSave.disabled = true;
+            btnSave.textContent = "Menyimpan...";
+
+            const payload = {
+                action: "checkin",
+                wa: currentWaScanned,
+                namaSiswa: currentNamaScanned,
+                checkinSiswa: document.getElementById('checkSiswa').checked,
+                checkinOrtu: document.getElementById('checkOrtu').checked
+            };
+
+            try {
+                const res = await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(payload),
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                });
+                const result = await res.json();
+                
+                if(result.status === "success") {
+                    alert("Berhasil! Kehadiran " + currentNamaScanned + " telah dicatat.");
+                    closeModal();
+                } else {
+                    alert("Gagal menyimpan: " + result.message);
+                }
+            } catch (err) {
+                alert("Terjadi kesalahan jaringan.");
+            } finally {
+                btnSave.disabled = false;
+                btnSave.textContent = "Simpan Data";
+            }
+        });
+
+        // ==========================================
+        // REKAP LOGIC (DAFTAR HADIR)
+        // ==========================================
+        async function loadRekap() {
+            const container = document.getElementById('rekapContainer');
+            container.innerHTML = '<p class="text-center text-sm text-slate-400 py-10 animate-pulse">Menarik data dari server...</p>';
+            
+            try {
+                const res = await fetch(`${API_URL}?action=get_attendees`);
+                const result = await res.json();
+
+                if (result.status === "success") {
+                    container.innerHTML = '';
+                    const data = result.data;
+                    
+                    if (data.length === 0) {
+                        container.innerHTML = '<p class="text-center text-sm text-slate-400 py-10">Belum ada tamu yang check-in hari ini.</p>';
+                        return;
+                    }
+
+                    // Format waktu
+                    const now = new Date();
+                    document.getElementById('lastSync').textContent = `Sinkronisasi terakhir: ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+
+                    data.forEach(item => {
+                        // Format tanggal sederhana dari timestamp
+                        const t = new Date(item.waktu);
+                        const jam = String(t.getHours()).padStart(2,'0') + ":" + String(t.getMinutes()).padStart(2,'0');
+                        
+                        const badgeSiswa = item.siswa === "HADIR" ? '<span class="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded font-bold">Siswa Hadir</span>' : '';
+                        const badgeOrtu = item.ortu === "HADIR" ? '<span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded font-bold">Ortu Hadir</span>' : '';
+                        const textNone = (item.siswa !== "HADIR" && item.ortu !== "HADIR") ? '<span class="text-xs text-red-500 font-bold">Dibatalkan (Uncheck)</span>' : '';
+
+                        container.insertAdjacentHTML('beforeend', `
+                            <div class="bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex items-center justify-between">
+                                <div>
+                                    <p class="font-bold text-slate-800 text-sm">${item.nama}</p>
+                                    <div class="flex gap-2 mt-1">
+                                        ${badgeSiswa} ${badgeOrtu} ${textNone}
+                                    </div>
+                                </div>
+                                <div class="text-right shrink-0">
+                                    <p class="text-xs text-slate-400 font-mono">${item.wa.substring(0,6)}***</p>
+                                    <p class="text-xs font-bold text-maroon mt-1">${jam} WIB</p>
+                                </div>
+                            </div>
+                        `);
+                    });
+
+                } else {
+                    container.innerHTML = `<p class="text-center text-sm text-red-500 py-10">Gagal menarik data: ${result.message}</p>`;
+                }
+            } catch(e) {
+                container.innerHTML = '<p class="text-center text-sm text-red-500 py-10">Koneksi terputus. Silakan coba lagi.</p>';
+            }
+        }
+
+        // ==========================================
+        // UI HELPERS
+        // ==========================================
+        function openModal() {
+            const modal = document.getElementById('scanModal');
+            const box = document.getElementById('scanModalBox');
+            modal.classList.remove('hidden');
+            setTimeout(() => { 
+                modal.classList.remove('opacity-0'); 
+                box.classList.remove('translate-y-full');
+            }, 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('scanModal');
+            const box = document.getElementById('scanModalBox');
+            modal.classList.add('opacity-0');
+            box.classList.add('translate-y-full');
+            setTimeout(() => { 
+                modal.classList.add('hidden');
+                // Resume scanner setelah modal ditutup
+                if(html5QrcodeScanner) html5QrcodeScanner.resume();
+            }, 300);
+        }
+
+        function showLoading(text) {
+            document.getElementById('loadingText').textContent = text;
+            document.getElementById('loadingScreen').classList.remove('hidden');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingScreen').classList.add('hidden');
+        }
+
+        // Init scanner saat web diload
+        document.addEventListener("DOMContentLoaded", () => {
+            initScanner();
+        });
+
+    </script>
+</body>
+</html>
