@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Undangan Awwalussanah SMA ABBS Surakarta</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { primary: '#1e3a8a', gold: '#d4af37' },
+                    fontFamily: { sans: ['"Plus Jakarta Sans"'], serif: ['"Playfair Display"'] }
+                }
+            }
+        }
+    </script>
+    <!-- Library QR Code -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <style>
+        body { background-color: #f1f5f9; }
+        .loader-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .7; transform: scale(0.95); } }
+        
+        input[type="radio"]:checked + div { border-color: #1e3a8a; background-color: #eff6ff; }
+        input[type="radio"]:checked + div .radio-dot { background-color: #1e3a8a; border-color: #1e3a8a; }
+    </style>
+</head>
+<body class="antialiased text-slate-800 relative">
+
+    <!-- PRELOADER -->
+    <div id="preloader" class="fixed inset-0 z-50 bg-white flex flex-col items-center justify-center transition-opacity duration-700">
+        <h2 class="font-serif text-3xl text-primary font-bold">SMA ABBS</h2>
+        <p class="text-slate-500 mt-2 animate-pulse text-sm">Menyiapkan Undangan Anda...</p>
+    </div>
+
+    <!-- ERROR SCREEN (Jika WA tidak valid) -->
+    <div id="errorScreen" class="fixed inset-0 z-40 bg-white flex flex-col items-center justify-center hidden">
+        <h2 class="font-bold text-xl text-red-600 mb-2">Undangan Tidak Ditemukan</h2>
+        <p id="errorText" class="text-slate-500 text-center px-6">Pastikan link yang Anda buka sudah benar.</p>
+    </div>
+
+    <!-- MAIN APP -->
+    <div id="app" class="max-w-md mx-auto min-h-screen bg-white shadow-2xl relative hidden opacity-0 transition-opacity duration-1000">
+        
+        <!-- Header Image -->
+        <div class="relative w-full h-48 bg-primary rounded-b-[2.5rem] shadow-md overflow-hidden">
+            <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/arabesque.png')] opacity-20"></div>
+            <div class="absolute inset-0 flex flex-col items-center justify-center text-center p-6 text-white z-10">
+                <p class="text-gold text-sm tracking-widest uppercase mb-1 font-semibold">Undangan Resmi</p>
+                <h1 class="font-serif text-3xl font-bold leading-tight">Awwalussanah</h1>
+                <p id="tahunAjaran" class="text-slate-200 mt-2 text-sm">-</p>
+            </div>
+        </div>
+
+        <div class="px-6 py-8">
+            <!-- Greeting Section -->
+            <div class="text-center mb-8">
+                <p class="text-slate-500 text-sm">Kepada Yth.</p>
+                <h2 id="namaSiswaDisplay" class="text-2xl font-bold text-primary mt-1 mb-1">-</h2>
+                <p class="text-slate-600 text-sm">dan Orang Tua/Wali</p>
+                <div class="w-12 h-1 bg-gold mx-auto mt-4 rounded-full"></div>
+            </div>
+
+            <!-- Event Details -->
+            <div class="bg-slate-50 rounded-2xl p-5 border border-slate-100 shadow-sm mb-8">
+                <h3 class="font-semibold text-lg mb-4 text-primary">Informasi Acara</h3>
+                <ul class="space-y-4">
+                    <li class="flex items-start">
+                        <span class="bg-blue-100 text-primary p-2 rounded-lg mr-3">📅</span>
+                        <div>
+                            <p class="text-xs text-slate-500">Tanggal</p>
+                            <p id="tanggalAcara" class="font-medium">-</p>
+                        </div>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="bg-blue-100 text-primary p-2 rounded-lg mr-3">⏰</span>
+                        <div>
+                            <p class="text-xs text-slate-500">Waktu</p>
+                            <p class="font-medium"><span id="waktuAcara">-</span> WIB</p>
+                        </div>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="bg-blue-100 text-primary p-2 rounded-lg mr-3">📍</span>
+                        <div>
+                            <p class="text-xs text-slate-500">Tempat</p>
+                            <p id="tempatAcara" class="font-medium">-</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Rundown -->
+            <div class="mb-8">
+                <h3 class="font-semibold text-lg mb-4 text-primary">Rundown Acara</h3>
+                <div id="rundownContainer" class="space-y-3">
+                    <!-- Injected by JS -->
+                </div>
+            </div>
+
+            <!-- QR Code -->
+            <div class="mb-8 text-center bg-white p-6 rounded-2xl border-2 border-dashed border-slate-200">
+                <h3 class="font-semibold text-lg text-primary mb-2">QR Code Presensi</h3>
+                <p class="text-sm text-slate-500 mb-4">Tunjukkan kode ini saat registrasi</p>
+                <div class="flex justify-center mb-2">
+                    <div id="qrcode" class="p-3 bg-white rounded-xl shadow-sm border border-slate-100 inline-block"></div>
+                </div>
+                <p class="text-xs text-slate-400 mt-2" id="waDisplay">-</p>
+            </div>
+
+            <!-- Form Konfirmasi -->
+            <div id="formSection" class="bg-white rounded-2xl shadow-[0_0_40px_rgba(0,0,0,0.05)] border border-slate-100 p-6">
+                <h3 class="font-bold text-xl text-primary mb-1 text-center">Konfirmasi Kehadiran</h3>
+                <p class="text-center text-sm text-slate-500 mb-6">Mohon isi untuk persiapan tempat.</p>
+                
+                <form id="konfirmasiForm" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-3">Kehadiran Siswa</label>
+                        <div class="space-y-2">
+                            <label class="cursor-pointer block relative"><input type="radio" name="hadirSiswa" value="offline" class="peer sr-only" required><div class="rounded-xl border border-slate-200 p-4 transition-all hover:bg-slate-50 flex items-center"><div class="radio-dot w-5 h-5 rounded-full border-2 border-slate-300 mr-3 flex items-center justify-center"></div><span class="font-medium text-slate-700 text-sm">Hadir Offline</span></div></label>
+                            <label class="cursor-pointer block relative"><input type="radio" name="hadirSiswa" value="online" class="peer sr-only"><div class="rounded-xl border border-slate-200 p-4 transition-all hover:bg-slate-50 flex items-center"><div class="radio-dot w-5 h-5 rounded-full border-2 border-slate-300 mr-3 flex items-center justify-center"></div><span class="font-medium text-slate-700 text-sm">Hadir Online</span></div></label>
+                            <label class="cursor-pointer block relative"><input type="radio" name="hadirSiswa" value="tidak hadir" class="peer sr-only"><div class="rounded-xl border border-slate-200 p-4 transition-all hover:bg-slate-50 flex items-center"><div class="radio-dot w-5 h-5 rounded-full border-2 border-slate-300 mr-3 flex items-center justify-center"></div><span class="font-medium text-slate-700 text-sm">Tidak Hadir</span></div></label>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-3">Kehadiran Orang Tua / Wali</label>
+                        <div class="space-y-2">
+                            <label class="cursor-pointer block relative"><input type="radio" name="hadirOrtu" value="offline" class="peer sr-only" required><div class="rounded-xl border border-slate-200 p-4 transition-all hover:bg-slate-50 flex items-center"><div class="radio-dot w-5 h-5 rounded-full border-2 border-slate-300 mr-3 flex items-center justify-center"></div><span class="font-medium text-slate-700 text-sm">Hadir Offline</span></div></label>
+                            <label class="cursor-pointer block relative"><input type="radio" name="hadirOrtu" value="online" class="peer sr-only"><div class="rounded-xl border border-slate-200 p-4 transition-all hover:bg-slate-50 flex items-center"><div class="radio-dot w-5 h-5 rounded-full border-2 border-slate-300 mr-3 flex items-center justify-center"></div><span class="font-medium text-slate-700 text-sm">Hadir Online</span></div></label>
+                            <label class="cursor-pointer block relative"><input type="radio" name="hadirOrtu" value="tidak hadir" class="peer sr-only"><div class="rounded-xl border border-slate-200 p-4 transition-all hover:bg-slate-50 flex items-center"><div class="radio-dot w-5 h-5 rounded-full border-2 border-slate-300 mr-3 flex items-center justify-center"></div><span class="font-medium text-slate-700 text-sm">Tidak Hadir</span></div></label>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="btnSubmit" class="w-full bg-primary text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-primary/30 transition-all">Kirim Konfirmasi</button>
+                </form>
+            </div>
+
+            <!-- Pesan Sukses -->
+            <div id="successMessage" class="hidden bg-green-50 border border-green-200 rounded-2xl p-6 text-center">
+                <div class="text-4xl mb-2">✅</div>
+                <h3 class="font-bold text-xl text-green-800 mb-2">Terima Kasih!</h3>
+                <p class="text-green-600 text-sm">Konfirmasi Anda telah tersimpan.</p>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT -->
+    <script>
+        const API_URL = "https://script.google.com/macros/s/AKfycbwEAtGqCErSAixIV7Swkq57Ru4KSJoulAF0l_lKddyJxONvq04rPU4UOwy4nl6W75HB/exec"; 
+
+        // Mengambil parameter '?wa=' dari URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlWa = urlParams.get('wa');
+        
+        let namaSiswaGlobal = ""; // Untuk menyimpan nama siswa saat form disubmit
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!urlWa) {
+                showError("Link undangan tidak lengkap (Parameter WA hilang).");
+                return;
+            }
+
+            try {
+                // Panggil API Spreadsheet
+                const response = await fetch(`${API_URL}?wa=${urlWa}`);
+                const data = await response.json();
+
+                if (data.status === "error") {
+                    showError(data.message);
+                    return;
+                }
+
+                // 1. Tampilkan Data Siswa
+                namaSiswaGlobal = data.siswa.nama;
+                document.getElementById('namaSiswaDisplay').textContent = data.siswa.nama;
+                document.getElementById('waDisplay').textContent = "ID: " + urlWa;
+
+                // 2. Generate QR Code
+                new QRCode(document.getElementById("qrcode"), {
+                    text: urlWa,
+                    width: 150, height: 150,
+                    colorDark : "#1e3a8a", colorLight : "#ffffff",
+                    correctLevel : QRCode.CorrectLevel.H
+                });
+
+                // 3. Tampilkan Data Acara (INFO)
+                document.getElementById('tahunAjaran').textContent = "Tahun Ajaran " + data.info['Tahun Ajaran'];
+                document.getElementById('tanggalAcara').textContent = data.info['Hari'] + ", " + data.info['Tanggal'];
+                document.getElementById('waktuAcara').textContent = data.info['Jam mulai'] + " - " + data.info['Jam berakhir'];
+                document.getElementById('tempatAcara').textContent = data.info['Tempat'];
+
+                // 4. Render Rundown
+                const rundownContainer = document.getElementById('rundownContainer');
+                data.rundown.forEach(item => {
+                    rundownContainer.insertAdjacentHTML('beforeend', `
+                        <div class="flex items-center bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
+                            <span class="font-bold text-primary w-20 text-sm shrink-0">${item.waktu}</span>
+                            <span class="text-slate-600 text-sm ml-2">${item.kegiatan}</span>
+                        </div>
+                    `);
+                });
+
+                // 5. Hilangkan Loading, Tampilkan Undangan
+                setTimeout(() => {
+                    document.getElementById('preloader').style.display = 'none';
+                    const app = document.getElementById('app');
+                    app.classList.remove('hidden');
+                    void app.offsetWidth; // Paksa render
+                    app.classList.remove('opacity-0');
+                }, 500);
+
+            } catch (error) {
+                showError("Gagal terhubung ke server. Silakan coba beberapa saat lagi.");
+            }
+        });
+
+        function showError(message) {
+            document.getElementById('preloader').style.display = 'none';
+            document.getElementById('errorScreen').classList.remove('hidden');
+            document.getElementById('errorText').textContent = message;
+        }
+
+        // SUBMIT FORM KE SPREADSHEET
+        document.getElementById('konfirmasiForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btnSubmit = document.getElementById('btnSubmit');
+            btnSubmit.disabled = true;
+            btnSubmit.textContent = 'Mengirim...';
+
+            const payload = {
+                namaSiswa: namaSiswaGlobal,
+                wa: urlWa,
+                kehadiranSiswa: document.querySelector('input[name="hadirSiswa"]:checked').value,
+                kehadiranOrtu: document.querySelector('input[name="hadirOrtu"]:checked').value
+            };
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(payload),
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                });
+
+                const result = await response.json();
+                if(result.status === "success") {
+                    document.getElementById('formSection').classList.add('hidden');
+                    document.getElementById('successMessage').classList.remove('hidden');
+                } else {
+                    alert("Gagal: " + result.message);
+                    btnSubmit.disabled = false;
+                    btnSubmit.textContent = 'Kirim Konfirmasi';
+                }
+            } catch (error) {
+                alert("Kesalahan jaringan. Silakan coba lagi.");
+                btnSubmit.disabled = false;
+                btnSubmit.textContent = 'Kirim Konfirmasi';
+            }
+        });
+    </script>
+</body>
+</html>
