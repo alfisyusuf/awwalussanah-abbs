@@ -1,195 +1,409 @@
 <!DOCTYPE html>
-<html lang="id" class="scroll-smooth">
+<html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IT Rundown - Awwalussanah SMA ABBS 26/27</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        .bg-maroon { background-color: #800000; }
-        .text-maroon { color: #800000; }
-        .border-maroon { border-color: #800000; }
-        /* Custom Scrollbar for dark theme */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #1f2937; }
-        ::-webkit-scrollbar-thumb { background: #800000; border-radius: 4px; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>IT Rundown - Awwalussanah SMA ABBS</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+
+  <style>
+    :root {
+      --font-sans: 'Inter', sans-serif;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font-sans); background: #FFF8F0; }
+
+    .root { min-height: 100vh; padding-bottom: 2rem; max-width: 480px; margin: 0 auto; background: #FFF8F0; box-shadow: 0 0 20px rgba(0,0,0,0.05); }
+
+    .header {
+      background: linear-gradient(135deg, #9B1C1C 0%, #C0392B 100%);
+      padding: 1.5rem 1.25rem 1.25rem;
+      color: white;
+      border-bottom-left-radius: 16px;
+      border-bottom-right-radius: 16px;
+      box-shadow: 0 4px 12px rgba(155, 28, 28, 0.15);
+    }
+    .header-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.2);
+      font-size: 10px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 20px;
+      margin-bottom: 10px;
+      letter-spacing: 0.5px;
+    }
+    .header-title {
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 1.25;
+    }
+    .header-sub {
+      font-size: 12px;
+      opacity: 0.85;
+      margin-top: 6px;
+    }
+    .header-tagline {
+      font-size: 11px;
+      font-style: italic;
+      opacity: 0.7;
+      margin-top: 4px;
+    }
+    .header-team {
+      margin-top: 14px;
+      background: rgba(0,0,0,0.15);
+      border-radius: 10px;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .header-team-label { font-size: 10px; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.5px; }
+    .header-team-names { font-size: 12px; font-weight: 600; margin-top: 2px; }
+
+    .section { padding: 1.5rem 1.25rem 0; }
+
+    .section-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #9B1C1C;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pc-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .pc-card {
+      background: white;
+      border-radius: 12px;
+      border: 1.5px solid #FFE0CC;
+      padding: 12px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+    .pc-card.full { grid-column: 1 / -1; }
+    .pc-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+    .pc-label { font-size: 12px; font-weight: 700; margin-bottom: 6px; }
+    .pc-desc { font-size: 11px; color: #6B7280; line-height: 1.5; }
+
+    .timeline { padding: 1.5rem 1.25rem 0; }
+
+    .segment {
+      background: white;
+      border-radius: 14px;
+      border: 1.5px solid #FFE4D6;
+      margin-bottom: 14px;
+      overflow: hidden;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    }
+    .segment-header {
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+      border-bottom: 1px solid #F3F4F6;
+    }
+    .segment-time-bar {
+      background: #9B1C1C;
+      color: white;
+      padding: 12px 10px;
+      min-width: 85px;
+      font-size: 12px;
+      font-weight: 700;
+      font-family: monospace;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      line-height: 1.4;
+    }
+    .segment-header-info {
+      flex: 1;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+    }
+    .segment-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1F2937;
+      line-height: 1.35;
+    }
+    .segment-body { padding: 10px; background: #FAFAFA; }
+    .task-row {
+      background: white;
+      border-radius: 8px;
+      border: 1px solid #E5E7EB;
+      padding: 10px;
+      margin-bottom: 8px;
+    }
+    .task-row:last-child { margin-bottom: 0; }
+    .task-pc-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .task-pc-label.vmix { color: #1D4ED8; }
+    .task-pc-label.flex { color: #6D28D9; }
+    .task-desc { font-size: 12px; color: #4B5563; line-height: 1.6; }
+    .task-desc b { color: #9B1C1C; font-weight: 600; }
+
+    .icon-circle {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: #FEE2E2;
+      display: flex; align-items: center; justify-content: center;
+      margin-right: 12px;
+      flex-shrink: 0;
+    }
+    .icon-circle i { font-size: 16px; color: #9B1C1C; }
+
+    .footer-note {
+      margin: 1.5rem 1.25rem 0;
+      background: white;
+      border-radius: 10px;
+      border: 1.5px solid #FCA5A5;
+      padding: 12px;
+      font-size: 11px;
+      color: #6B7280;
+      text-align: center;
+    }
+    .footer-note span { color: #9B1C1C; font-weight: 600; }
+  </style>
 </head>
-<body class="bg-gray-900 text-gray-100 min-h-screen">
+<body>
 
-    <header class="bg-maroon text-white py-6 shadow-lg border-b-4 border-red-500 sticky top-0 z-50">
-        <div class="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center">
-            <div>
-                <h1 class="text-2xl md:text-3xl font-bold uppercase tracking-wide">IT Command Center</h1>
-                <p class="text-red-200 text-sm mt-1">Awwalussanah SMA ABBS Surakarta 2026/2027 | Harris Hotel</p>
-                <p class="text-xs italic text-red-300 mt-1">"Grow in Faith, Shine with Grace, Lead the Race"</p>
-            </div>
-            <div class="mt-4 md:mt-0 text-right">
-                <div class="text-sm text-red-200">Tim IT / PIC:</div>
-                <div class="font-semibold text-lg">Mr. Alfi &bull; Mr. Rengga &bull; Ms. Sekar</div>
-            </div>
+<div class="root">
+  <h2 class="sr-only" style="display: none;">IT Rundown Awwalussanah SMA ABBS 2026/2027</h2>
+
+  <div class="header">
+    <div class="header-badge"><i class="ti ti-target" style="vertical-align: -2px; font-size: 12px;"></i> IT COMMAND CENTER</div>
+    <div class="header-title">Awwalussanah SMA ABBS<br>Surakarta 2026/2027</div>
+    <div class="header-sub"><i class="ti ti-map-pin" style="vertical-align: -1px; font-size: 12px;"></i> Harris Hotel · Live Execution Rundown</div>
+    <div class="header-tagline">"Grow in Faith, Shine with Grace, Lead the Race"</div>
+    <div class="header-team">
+      <i class="ti ti-users" style="font-size:20px; opacity:.8;" aria-hidden="true"></i>
+      <div>
+        <div class="header-team-label">Tim IT / PIC</div>
+        <div class="header-team-names">Mr. Alfi · Mr. Rengga · Ms. Sekar</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><i class="ti ti-devices"></i> Setup Komputer</div>
+    <div class="pc-grid">
+      <div class="pc-card" style="border-color:#BFDBFE; background:#EFF6FF;">
+        <div class="pc-label" style="color:#1D4ED8;"><span class="pc-dot" style="background:#3B82F6;"></span>PC 1 · vMix</div>
+        <div class="pc-desc">Master switching, lower thirds, video, bumper & routing audio</div>
+      </div>
+      <div class="pc-card" style="border-color:#DDD6FE; background:#F5F3FF;">
+        <div class="pc-label" style="color:#6D28D9;"><span class="pc-dot" style="background:#8B5CF6;"></span>PC 2 · PPT & Zoom</div>
+        <div class="pc-desc">Slide PPT utama ke vMix + pantau room Zoom</div>
+      </div>
+      <div class="pc-card full" style="border-color:#E9D5FF; background:#FAF5FF;">
+        <div class="pc-label" style="color:#7C3AED;"><span class="pc-dot" style="background:#A78BFA;"></span>PC 3 · Backup</div>
+        <div class="pc-desc">PPT pembicara berikutnya atau standby sebagai backup visual ke layar</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="timeline">
+    <div class="section-title"><i class="ti ti-clock"></i> Timeline Acara</div>
+
+    <div class="segment">
+      <div class="segment-header">
+        <div class="segment-time-bar">07.00<br>—<br>07.30</div>
+        <div class="segment-header-info">
+          <div class="icon-circle"><i class="ti ti-login" aria-hidden="true"></i></div>
+          <div class="segment-title">Registrasi &amp; Akses Zoom</div>
         </div>
-    </header>
-
-    <section class="container mx-auto px-4 py-8">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="bg-gray-800 rounded-xl p-5 border-l-4 border-blue-500 shadow-md">
-                <h2 class="text-xl font-bold text-blue-400 mb-2 flex items-center">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                    PC 1: vMix (Master)
-                </h2>
-                <p class="text-sm text-gray-400">Handle *switching* kamera, *lower thirds* nama pembicara/MC, layout visual *backdrop*, dan *output* akhir ke proyektor/LED.</p>
-            </div>
-            <div class="bg-gray-800 rounded-xl p-5 border-l-4 border-blue-400 shadow-md">
-                <h2 class="text-xl font-bold text-blue-300 mb-2 flex items-center">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                    PC 2: Zoom Host
-                </h2>
-                <p class="text-sm text-gray-400">Handle *admit* partisipan, manajemen *seating plan* virtual, *spotlight* kamera utama/vMix untuk disiarkan ke audiens online.</p>
-            </div>
-            <div class="bg-gray-800 rounded-xl p-5 border-l-4 border-purple-500 shadow-md">
-                <h2 class="text-xl font-bold text-purple-400 mb-2 flex items-center">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg>
-                    PC 3: Presentasi & Media
-                </h2>
-                <p class="text-sm text-gray-400">Handle PPT, *play* video (lagu wajib, profil), *play backsound* (audio jungle, otw.mp3, musik band). Feed dikirim ke vMix.</p>
-            </div>
+      </div>
+      <div class="segment-body">
+        <div class="task-row">
+          <div class="task-pc-label vmix"><i class="ti ti-device-tv" aria-hidden="true"></i> vMix (Utama)</div>
+          <div class="task-desc">PLAY video kegiatan &amp; program (YouTube) ke layar utama. Input audio dokumentasi ke Zoom.</div>
         </div>
-
-        <div class="bg-gray-800 rounded-xl shadow-xl overflow-hidden">
-            <div class="bg-gray-700 px-6 py-4 border-b border-gray-600">
-                <h2 class="text-xl font-bold text-white">Live Execution Rundown</h2>
-            </div>
-            
-            <div class="divide-y divide-gray-700">
-                
-                <div class="p-6 hover:bg-gray-750 transition duration-150 flex flex-col md:flex-row gap-4">
-                    <div class="md:w-32 flex-shrink-0">
-                        <span class="bg-maroon text-white font-mono px-3 py-1 rounded text-sm font-bold shadow">07.00 - 07.30</span>
-                    </div>
-                    <div class="flex-grow">
-                        <h3 class="text-lg font-bold text-white mb-1">Registrasi & Akses Zoom</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3">
-                            <div class="bg-gray-900 p-3 rounded border border-gray-700"><span class="text-xs font-bold text-blue-400 uppercase">vMix</span><br><span class="text-sm">Tampilkan Video-video kegiatan dan program (YouTube) ke screen.</span></div>
-                            <div class="bg-gray-900 p-3 rounded border border-gray-700"><span class="text-xs font-bold text-blue-300 uppercase">Zoom</span><br><span class="text-sm">Buka room, terima ortu/siswa baru. Spotlight video dokumentasi. (PIC: Mr Rengga)</span></div>
-                            <div class="bg-gray-900 p-3 rounded border border-gray-700"><span class="text-xs font-bold text-purple-400 uppercase">Presentasi</span><br><span class="text-sm">Standby Media.</span></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="p-6 hover:bg-gray-750 transition duration-150 flex flex-col md:flex-row gap-4">
-                    <div class="md:w-32 flex-shrink-0">
-                        <span class="bg-maroon text-white font-mono px-3 py-1 rounded text-sm font-bold shadow">08.00 - 08.05</span>
-                    </div>
-                    <div class="flex-grow">
-                        <h3 class="text-lg font-bold text-white mb-1">Opening by MC</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3">
-                            <div class="bg-gray-900 p-3 rounded border border-gray-700"><span class="text-xs font-bold text-blue-400 uppercase">vMix</span><br><span class="text-sm">Tampilkan desain backdrop acara. Tampilkan *Lower Third* Nama MC (M. Zidni & Ardra).</span></div>
-                            <div class="bg-gray-900 p-3 rounded border border-gray-700"><span class="text-xs font-bold text-blue-300 uppercase">Zoom</span><br><span class="text-sm">Spotlight kamera MC.</span></div>
-                            <div class="bg-gray-900 p-3 rounded border border-gray-700"><span class="text-xs font-bold text-purple-400 uppercase">Presentasi</span><br><span class="text-sm">PLAY Backsound: <b>Audio jungle.mp3</b> atau opening audio.</span></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="p-6 hover:bg-gray-750 transition duration-150 flex flex-col md:flex-row gap-4">
-                    <div class="md:w-32 flex-shrink-0">
-                        <span class="bg-maroon text-white font-mono px-3 py-1 rounded text-sm font-bold shadow">08.05 - 08.10</span>
-                    </div>
-                    <div class="flex-grow">
-                        <h3 class="text-lg font-bold text-white mb-1">Tilawah Quran</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3">
-                            <div class="bg-gray-900 p-3 rounded border border-gray-700"><span class="text-xs font-bold text-blue-400 uppercase">vMix</span><br><span class="text-sm">Picture in Picture PPT Terjemahan + Kamera Qari. Tampilkan *Lower Third* (Danish & Nabil).</span></div>
-                            <div class="bg-gray-900 p-3 rounded border border-gray-700"><span class="text-xs font-bold text-blue-300 uppercase">Zoom</span><br><span class="text-sm">Spotlight feed vMix.</span></div>
-                            <div class="bg-gray-900 p-3 rounded border border-gray-700"><span class="text-xs font-bold text-purple-400 uppercase">Presentasi</span><br><span class="text-sm">Jalankan PPT terjemahan EN & ID. (PIC: Mr Alfi)</span></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="p-6 hover:bg-gray-750 transition duration-150 flex flex-col md:flex-row gap-4">
-                    <div class="md:w-32 flex-shrink-0">
-                        <span class="bg-maroon text-white font-mono px-3 py-1 rounded text-sm font-bold shadow">08.10 - 08.20</span>
-                    </div>
-                    <div class="flex-grow">
-                        <h3 class="text-lg font-bold text-white mb-1">Menyanyikan Lagu (Indo Raya, Mars Yayasan, Mars ABBS)</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3">
-                            <div class="bg-gray-900 p-3 rounded border border-gray-700"><span class="text-xs font-bold text-blue-400 uppercase">vMix</span><br><span class="text-sm">Output Full Screen Video 1 (Tampilan lirik lagu). *Peserta offline tidak di shoot.*</span></div>
-                            <div class="bg-gray-900 p-3 rounded border border-gray-700"><span class="text-xs font-bold text-blue-300 uppercase">Zoom</span><br><span class="text-sm">Pastikan audio komputer (lagu) masuk ke Zoom.</span></div>
-                            <div class="bg-gray-900 p-3 rounded border border-gray-700"><span class="text-xs font-bold text-purple-400 uppercase">Presentasi</span><br><span class="text-sm">PLAY Video Instrumental Lagu. Tim IT siap instrumen & syair.</span></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="p-6 hover:bg-gray-750 transition duration-150 flex flex-col md:flex-row gap-4">
-                    <div class="md:w-32 flex-shrink-0">
-                        <span class="bg-maroon text-white font-mono px-3 py-1 rounded text-sm font-bold shadow">08.45 - 08.55</span>
-                    </div>
-                    <div class="flex-grow">
-                        <h3 class="text-lg font-bold text-white mb-1">Sambutan Ketua Komite (Bapak Suwarmin Mulyadi)</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
-                            <div class="bg-gray-900 p-3 rounded border border-gray-700"><span class="text-xs font-bold text-blue-400 uppercase">vMix</span><br><span class="text-sm">Tampilan desain backdrop saat pembicara menuju podium. Full screen 1. Lower Third Nama.</span></div>
-                            <div class="bg-gray-900 p-3 rounded border border-gray-700"><span class="text-xs font-bold text-purple-400 uppercase">Presentasi</span><br><span class="text-sm">PLAY Backsound <b>otw.mp3</b> (24 detik).</span></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="p-6 hover:bg-gray-750 transition duration-150 flex flex-col md:flex-row gap-4">
-                    <div class="md:w-32 flex-shrink-0">
-                        <span class="bg-maroon text-white font-mono px-3 py-1 rounded text-sm font-bold shadow">08.55 - 09.40</span>
-                    </div>
-                    <div class="flex-grow">
-                        <h3 class="text-lg font-bold text-white mb-1">Sambutan Kepala Sekolah & Testimoni</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
-                            <div class="bg-gray-900 p-3 rounded border border-gray-700"><span class="text-xs font-bold text-blue-400 uppercase">vMix</span><br><span class="text-sm">Switch antara Kamera Kepsek & Input Presentasi. Tampilkan Lower Third 4 Siswa Testimoni.</span></div>
-                            <div class="bg-gray-900 p-3 rounded border border-gray-700"><span class="text-xs font-bold text-purple-400 uppercase">Presentasi</span><br><span class="text-sm">PLAY Backsound <b>otw.mp3</b>. Jalankan Slide Presentasi Kepsek (Prestasi, dll). Siapkan Video Profil/Alumni (Farah, Irfan, Rahma).</span></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="p-6 hover:bg-gray-750 transition duration-150 flex flex-col md:flex-row gap-4">
-                    <div class="md:w-32 flex-shrink-0">
-                        <span class="bg-maroon text-white font-mono px-3 py-1 rounded text-sm font-bold shadow">10.55 - 11.05</span>
-                    </div>
-                    <div class="flex-grow">
-                        <h3 class="text-lg font-bold text-white mb-1">Video Unity in Diversity in My School</h3>
-                        <div class="grid grid-cols-1 gap-3 mt-3">
-                            <div class="bg-gray-900 p-3 rounded border border-gray-700 flex items-center">
-                                <span class="text-xs font-bold text-blue-400 uppercase mr-3">vMix / Media</span>
-                                <span class="text-sm">Tampilkan FULLSCREEN video profil karya Ms Nasya. (Info: Lampu ballroom mati).</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                 <div class="p-6 hover:bg-gray-750 transition duration-150 flex flex-col md:flex-row gap-4">
-                    <div class="md:w-32 flex-shrink-0">
-                        <span class="bg-maroon text-white font-mono px-3 py-1 rounded text-sm font-bold shadow">11.25 - 11.35</span>
-                    </div>
-                    <div class="flex-grow">
-                        <h3 class="text-lg font-bold text-white mb-1">Pengumuman Kurikulum (Mr Rudi)</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
-                            <div class="bg-gray-900 p-3 rounded border border-gray-700"><span class="text-xs font-bold text-blue-400 uppercase">vMix</span><br><span class="text-sm">Switch output Slide Tampilan Informasi Kurikulum ke Layar.</span></div>
-                            <div class="bg-gray-900 p-3 rounded border border-gray-700"><span class="text-xs font-bold text-purple-400 uppercase">Presentasi</span><br><span class="text-sm">Jalankan slide info (OPC, Timeline, Boarding, Placement Test). Pastikan share link/info di kolom komentar Zoom.</span></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="p-6 hover:bg-gray-750 transition duration-150 flex flex-col md:flex-row gap-4">
-                    <div class="md:w-32 flex-shrink-0">
-                        <span class="bg-maroon text-white font-mono px-3 py-1 rounded text-sm font-bold shadow">11.35 - 11.40</span>
-                    </div>
-                    <div class="flex-grow">
-                        <h3 class="text-lg font-bold text-white mb-1">Closing</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
-                            <div class="bg-gray-900 p-3 rounded border border-gray-700"><span class="text-xs font-bold text-blue-400 uppercase">vMix</span><br><span class="text-sm">Tampilkan backdrop setelah acara ditutup. Standby slide YouTube address.</span></div>
-                            <div class="bg-gray-900 p-3 rounded border border-gray-700"><span class="text-xs font-bold text-purple-400 uppercase">Presentasi</span><br><span class="text-sm">PLAY Backsound penutup. Tampilkan slide Informasi Rekaman YouTube (Unlisted).</span></div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
+        <div class="task-row">
+          <div class="task-pc-label flex"><i class="ti ti-layout-grid" aria-hidden="true"></i> PC 2 / 3 (Fleksibel)</div>
+          <div class="task-desc">Buka room Zoom, admit tamu. Pastikan spotlight feed vMix aman.</div>
         </div>
-    </section>
+      </div>
+    </div>
+
+    <div class="segment">
+      <div class="segment-header">
+        <div class="segment-time-bar">08.00<br>—<br>08.05</div>
+        <div class="segment-header-info">
+          <div class="icon-circle"><i class="ti ti-microphone" aria-hidden="true"></i></div>
+          <div class="segment-title">Opening by MC</div>
+        </div>
+      </div>
+      <div class="segment-body">
+        <div class="task-row">
+          <div class="task-pc-label vmix"><i class="ti ti-device-tv" aria-hidden="true"></i> vMix (Utama)</div>
+          <div class="task-desc">PLAY backsound: <b>audio jungle.mp3</b>. Tampilkan backdrop acara. Lower Third: <b>M. Zidni &amp; Ardra</b>.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="segment">
+      <div class="segment-header">
+        <div class="segment-time-bar">08.05<br>—<br>08.10</div>
+        <div class="segment-header-info">
+          <div class="icon-circle"><i class="ti ti-book" aria-hidden="true"></i></div>
+          <div class="segment-title">Tilawah Quran</div>
+        </div>
+      </div>
+      <div class="segment-body">
+        <div class="task-row">
+          <div class="task-pc-label vmix"><i class="ti ti-device-tv" aria-hidden="true"></i> vMix (Utama)</div>
+          <div class="task-desc">PiP: Input PPT Terjemahan + Kamera Qari. Lower Third: <b>Danish &amp; Nabil</b>.</div>
+        </div>
+        <div class="task-row">
+          <div class="task-pc-label flex"><i class="ti ti-layout-grid" aria-hidden="true"></i> PC 2 / 3 (Fleksibel)</div>
+          <div class="task-desc">Jalankan slide PPT terjemahan EN &amp; ID, feed dikirim ke vMix.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="segment">
+      <div class="segment-header">
+        <div class="segment-time-bar">08.10<br>—<br>08.20</div>
+        <div class="segment-header-info">
+          <div class="icon-circle"><i class="ti ti-music" aria-hidden="true"></i></div>
+          <div class="segment-title">Menyanyikan Lagu<br><span style="font-size:11px; font-weight:400; color:#6B7280; margin-top:2px; display:block;">Indo Raya · Mars Yayasan · Mars ABBS</span></div>
+        </div>
+      </div>
+      <div class="segment-body">
+        <div class="task-row">
+          <div class="task-pc-label vmix"><i class="ti ti-device-tv" aria-hidden="true"></i> vMix (Utama)</div>
+          <div class="task-desc">PLAY video instrumental + fullscreen lirik. Peserta offline tidak di-shoot. Audio routing ke Zoom &amp; Master Out.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="segment">
+      <div class="segment-header">
+        <div class="segment-time-bar">08.45<br>—<br>08.55</div>
+        <div class="segment-header-info">
+          <div class="icon-circle"><i class="ti ti-speakerphone" aria-hidden="true"></i></div>
+          <div class="segment-title">Sambutan Ketua Komite<br><span style="font-size:11px; font-weight:400; color:#6B7280; margin-top:2px; display:block;">Bapak Suwarmin Mulyadi</span></div>
+        </div>
+      </div>
+      <div class="segment-body">
+        <div class="task-row">
+          <div class="task-pc-label vmix"><i class="ti ti-device-tv" aria-hidden="true"></i> vMix (Utama)</div>
+          <div class="task-desc">PLAY backsound <b>otw.mp3</b> (24 detik) saat jalan ke podium. Tampilkan backdrop &amp; Lower Third nama.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="segment">
+      <div class="segment-header">
+        <div class="segment-time-bar">08.55<br>—<br>09.40</div>
+        <div class="segment-header-info">
+          <div class="icon-circle"><i class="ti ti-award" aria-hidden="true"></i></div>
+          <div class="segment-title">Sambutan Kepala Sekolah &amp; Testimoni</div>
+        </div>
+      </div>
+      <div class="segment-body">
+        <div class="task-row">
+          <div class="task-pc-label vmix"><i class="ti ti-device-tv" aria-hidden="true"></i> vMix (Utama)</div>
+          <div class="task-desc">PLAY <b>otw.mp3</b>. Switch kamera Kepsek ↔ PPT. PLAY video profil/alumni: <b>Farah, Irfan, Rahma</b>. Tampilkan Lower Third testimoni.</div>
+        </div>
+        <div class="task-row">
+          <div class="task-pc-label flex"><i class="ti ti-layout-grid" aria-hidden="true"></i> PC 2 / 3 (Fleksibel)</div>
+          <div class="task-desc">Kendalikan perpindahan slide PPT Kepsek (Prestasi, dll).</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="segment" style="border-color:#FCA5A5;">
+      <div class="segment-header">
+        <div class="segment-time-bar" style="background: #C0392B;">10.55<br>—<br>11.05</div>
+        <div class="segment-header-info">
+          <div class="icon-circle" style="background:#FEE2E2;"><i class="ti ti-player-play" aria-hidden="true"></i></div>
+          <div class="segment-title">Video Unity in Diversity<br><span style="font-size:11px; font-weight:400; color:#6B7280; margin-top:2px; display:block;">Karya Ms. Nasya</span></div>
+        </div>
+      </div>
+      <div class="segment-body" style="background:#FFF1F2;">
+        <div class="task-row" style="border-color:#FCA5A5;">
+          <div class="task-pc-label vmix"><i class="ti ti-device-tv" aria-hidden="true"></i> vMix (Utama)</div>
+          <div class="task-desc">PLAY <b>FULLSCREEN</b> video profil. ⚠️ Lampu ballroom akan dimatikan.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="segment">
+      <div class="segment-header">
+        <div class="segment-time-bar">11.25<br>—<br>11.35</div>
+        <div class="segment-header-info">
+          <div class="icon-circle"><i class="ti ti-clipboard-list" aria-hidden="true"></i></div>
+          <div class="segment-title">Pengumuman Kurikulum<br><span style="font-size:11px; font-weight:400; color:#6B7280; margin-top:2px; display:block;">Mr. Rudi</span></div>
+        </div>
+      </div>
+      <div class="segment-body">
+        <div class="task-row">
+          <div class="task-pc-label vmix"><i class="ti ti-device-tv" aria-hidden="true"></i> vMix (Utama)</div>
+          <div class="task-desc">Switch ke screen capture dari input PC PPT.</div>
+        </div>
+        <div class="task-row">
+          <div class="task-pc-label flex"><i class="ti ti-layout-grid" aria-hidden="true"></i> PC 2 / 3 (Fleksibel)</div>
+          <div class="task-desc">Jalankan slide: OPC, Timeline, Boarding, Placement Test. Share link info di chat Zoom.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="segment" style="border-color:#BBF7D0;">
+      <div class="segment-header" style="border-color:#BBF7D0;">
+        <div class="segment-time-bar" style="background:#15803D;">11.35<br>—<br>11.40</div>
+        <div class="segment-header-info">
+          <div class="icon-circle" style="background:#DCFCE7;"><i class="ti ti-flag-check" style="color:#15803D;" aria-hidden="true"></i></div>
+          <div class="segment-title">Closing</div>
+        </div>
+      </div>
+      <div class="segment-body" style="background:#F0FDF4;">
+        <div class="task-row" style="border-color:#BBF7D0;">
+          <div class="task-pc-label vmix"><i class="ti ti-device-tv" aria-hidden="true"></i> vMix (Utama)</div>
+          <div class="task-desc">PLAY backsound penutup. Tampilkan backdrop closing.</div>
+        </div>
+        <div class="task-row" style="border-color:#BBF7D0;">
+          <div class="task-pc-label flex"><i class="ti ti-layout-grid" aria-hidden="true"></i> PC 2 / 3 (Fleksibel)</div>
+          <div class="task-desc">Tampilkan slide informasi rekaman YouTube.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer-note">
+    <span>9 segmen</span> · 07.00–11.40 WIB · Harris Hotel Surakarta
+  </div>
+</div>
+
 </body>
 </html>
