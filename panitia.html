@@ -163,6 +163,7 @@
         
         let html5QrCode;
         let isScanning = false;
+        let ignoreScans = false; // "Gembok Software" Anti-Bug iOS
         let currentWaScanned = "";
         let currentNamaScanned = "";
 
@@ -188,15 +189,14 @@
             tabRekap.classList.remove('hidden');
             loadRekap();
             
-            // Matikan kamera jika sedang pindah tab
+            // Matikan kamera total jika pindah tab agar hemat baterai
             if(isScanning) stopCamera();
         });
 
         // ==========================================
-        // CUSTOM QR SCANNER LOGIC (DENGAN FIX iPHONE)
+        // CUSTOM QR SCANNER LOGIC (DENGAN FIX iPHONE 2.0)
         // ==========================================
         document.addEventListener("DOMContentLoaded", () => {
-            // Gunakan Html5Qrcode murni untuk kontrol penuh
             html5QrCode = new Html5Qrcode("reader");
         });
 
@@ -215,22 +215,22 @@
             btnStartCamera.disabled = true;
 
             html5QrCode.start(
-                { facingMode: "environment" }, // Prioritas kamera belakang
+                { facingMode: "environment" }, 
                 { 
                     fps: 10, 
-                    qrbox: { width: 220, height: 220 }, // FIX 1: Diperkecil agar masuk di layar iPhone
+                    qrbox: { width: 220, height: 220 },
                     aspectRatio: 1.0,
-                    formatsToSupport: [ Html5QrcodeSupportedFormats.QR_CODE ] // FIX 2: Paksa hanya baca QR, abaikan Barcode biasa
+                    formatsToSupport: [ Html5QrcodeSupportedFormats.QR_CODE ] 
                 },
                 onScanSuccess,
                 (errorMessage) => { /* Abaikan pesan error pemindaian per-frame */ }
             ).then(() => {
                 isScanning = true;
+                ignoreScans = false; // Buka gembok saat kamera baru mulai
                 btnStartCamera.disabled = false;
                 btnStartCamera.innerHTML = "⏹ Matikan Kamera";
                 btnStartCamera.className = "w-full bg-slate-500 text-white font-bold py-3 px-4 rounded-xl mt-4 shadow-md hover:bg-slate-600 transition-all flex justify-center items-center gap-2";
                 
-                // FIX 3: Paksa atribut playsinline untuk Safari iOS agar video tidak patah
                 const videoEl = document.querySelector("#reader video");
                 if(videoEl) {
                     videoEl.setAttribute("playsinline", "true");
@@ -244,7 +244,7 @@
         }
 
         function stopCamera() {
-            if (html5QrCode) {
+            if (html5QrCode && isScanning) {
                 html5QrCode.stop().then(() => {
                     isScanning = false;
                     btnStartCamera.innerHTML = "Mulai Kamera";
@@ -256,8 +256,11 @@
         }
 
         function onScanSuccess(decodedText, decodedResult) {
-            // Hentikan kamera sementara setelah QR ditemukan agar tidak berat
-            stopCamera();
+            // FIX iPHONE TERBARU: Jangan matikan kamera! 
+            // Cukup gunakan gembok software agar tidak nyecan berulang kali.
+            if (ignoreScans) return; // Jika digembok, abaikan pemindaian
+            
+            ignoreScans = true; // Kunci gembok sekarang
             currentWaScanned = decodedText;
             fetchDataSiswa(decodedText);
         }
@@ -274,6 +277,7 @@
 
                 if(data.status === "error") {
                     alert("Gagal: " + data.message);
+                    ignoreScans = false; // Buka gembok jika error
                     return;
                 }
 
@@ -282,11 +286,9 @@
                 document.getElementById('modalNamaSiswa').textContent = data.siswa.nama;
                 document.getElementById('modalId').textContent = "WA/ID: " + wa;
 
-                // Tampilkan rencana konfirmasi dari web
                 document.getElementById('rencanaSiswa').textContent = data.konfirmasi ? (data.konfirmasi.hadirSiswa === "offline" ? "Hadir" : "Tidak/Online") : "Belum Isi";
                 document.getElementById('rencanaOrtu').textContent  = data.konfirmasi ? (data.konfirmasi.hadirOrtu === "offline" ? "Hadir" : "Tidak/Online") : "Belum Isi";
 
-                // SET CHECKBOX STATUS
                 const chkSiswa = document.getElementById('checkSiswa');
                 const chkOrtu = document.getElementById('checkOrtu');
                 
@@ -294,7 +296,6 @@
                     chkSiswa.checked = (data.checkin.siswaHadir === "HADIR");
                     chkOrtu.checked = (data.checkin.ortuHadir === "HADIR");
                 } else {
-                    // Default mengikuti isian form
                     chkSiswa.checked = data.konfirmasi ? (data.konfirmasi.hadirSiswa === "offline") : false;
                     chkOrtu.checked = data.konfirmasi ? (data.konfirmasi.hadirOrtu === "offline") : false;
                 }
@@ -304,6 +305,7 @@
             } catch (err) {
                 hideLoading();
                 alert("Koneksi gagal. Cek internet Anda.");
+                ignoreScans = false; // Buka gembok jika error
             }
         }
 
@@ -330,10 +332,12 @@
                 const result = await res.json();
                 
                 if(result.status === "success") {
+                    // Alert ini menggunakan browser default
                     alert("Berhasil! Kehadiran " + currentNamaScanned + " telah dicatat.");
                     closeModal();
                 } else {
                     alert("Gagal menyimpan: " + result.message);
+                    // Biarkan modal tetap terbuka agar bisa coba simpan lagi
                 }
             } catch (err) {
                 alert("Terjadi kesalahan jaringan.");
@@ -415,10 +419,11 @@
             const box = document.getElementById('scanModalBox');
             modal.classList.add('opacity-0');
             box.classList.add('translate-y-full');
+            
             setTimeout(() => { 
                 modal.classList.add('hidden');
-                // Auto start camera again to scan next person
-                startCamera();
+                // BUKA GEMBOK AGAR SIAP SCAN ORANG BERIKUTNYA SEKETIKA
+                ignoreScans = false; 
             }, 300);
         }
 
