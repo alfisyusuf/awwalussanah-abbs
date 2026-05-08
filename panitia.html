@@ -7,7 +7,6 @@
     
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Library QR Core -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.4/html5-qrcode.min.js"></script>
 
     <script>
@@ -42,7 +41,6 @@
 </head>
 <body class="antialiased text-slate-800 pb-20">
 
-    <!-- Header Panel dengan LOGO -->
     <div class="bg-gradient-to-r from-maroon to-maroondark text-white p-4 sticky top-0 z-40 shadow-md">
         <div class="max-w-md mx-auto flex items-center gap-3">
             <div class="w-11 h-11 bg-white rounded-full flex items-center justify-center border-2 border-bluelight overflow-hidden shrink-0 shadow-sm">
@@ -56,7 +54,6 @@
         </div>
     </div>
 
-    <!-- Navigation Tabs -->
     <div class="bg-white shadow-sm sticky top-[75px] z-30">
         <div class="max-w-md mx-auto flex text-sm font-semibold">
             <button id="btnTabScan" class="flex-1 py-3 border-b-2 border-maroon text-maroon text-center transition-colors">
@@ -70,13 +67,11 @@
 
     <main class="max-w-md mx-auto p-4">
         
-        <!-- ==================== TAB SCANNER ==================== -->
         <div id="tabScan" class="block space-y-4">
             
             <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 text-center">
                 <p class="text-sm text-slate-500 mb-4">Arahkan kamera ke QR Code undangan peserta.</p>
                 
-                <!-- Area Kamera QR Custom -->
                 <div id="reader" class="relative shadow-inner">
                     <span class="text-slate-400 font-medium absolute z-0 flex flex-col items-center">
                         <span class="text-3xl mb-2">📸</span>
@@ -84,14 +79,12 @@
                     </span>
                 </div>
 
-                <!-- Tombol Kontrol Kamera -->
                 <button id="btnStartCamera" class="w-full bg-maroon text-white font-bold py-3 px-4 rounded-xl mt-4 shadow-lg hover:shadow-xl transition-all flex justify-center items-center gap-2">
                     <span>Mulai Kamera</span>
                 </button>
             </div>
         </div>
 
-        <!-- ==================== TAB REKAP ==================== -->
         <div id="tabRekap" class="hidden space-y-4">
             <div class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-slate-100">
                 <div>
@@ -103,7 +96,6 @@
                 </button>
             </div>
 
-            <!-- List Rekap -->
             <div id="rekapContainer" class="space-y-3">
                 <p class="text-center text-sm text-slate-400 py-10">Memuat data kehadiran...</p>
             </div>
@@ -111,7 +103,6 @@
 
     </main>
 
-    <!-- ==================== MODAL HASIL SCAN ==================== -->
     <div id="scanModal" class="fixed inset-0 bg-slate-900/60 z-50 flex flex-col justify-end md:justify-center items-center hidden opacity-0 transition-opacity">
         <div class="bg-white w-full max-w-md md:rounded-2xl rounded-t-3xl p-6 transform translate-y-full md:translate-y-0 transition-transform duration-300" id="scanModalBox">
             
@@ -123,7 +114,6 @@
                 </div>
             </div>
 
-            <!-- Info Rencana Kehadiran dari Spreadsheet -->
             <div class="bg-slate-50 rounded-xl p-3 border border-slate-100 mb-5">
                 <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Rencana Kehadiran (Dari Web):</p>
                 <div class="flex justify-between text-sm">
@@ -162,13 +152,11 @@
         </div>
     </div>
 
-    <!-- Alert Loading (Full Screen) -->
     <div id="loadingScreen" class="fixed inset-0 bg-white/80 backdrop-blur-sm z-[60] flex flex-col items-center justify-center hidden">
         <div class="animate-spin rounded-full h-12 w-12 border-4 border-slate-200 border-t-maroon mb-3"></div>
         <p class="text-maroon font-semibold" id="loadingText">Mencari data...</p>
     </div>
 
-    <!-- Script Kustom -->
     <script>
         // GANTI DENGAN URL DEPLOYMENT APPS SCRIPT ANDA
         const API_URL = "https://script.google.com/macros/s/AKfycbz4ySkOq0Pd9cH25_z4HQ0kBNy2fKRx2yeqXO5P7EXWRzQmaDfriGswu6EsyimbuEJq/exec"; 
@@ -205,9 +193,10 @@
         });
 
         // ==========================================
-        // CUSTOM QR SCANNER LOGIC
+        // CUSTOM QR SCANNER LOGIC (DENGAN FIX iPHONE)
         // ==========================================
         document.addEventListener("DOMContentLoaded", () => {
+            // Gunakan Html5Qrcode murni untuk kontrol penuh
             html5QrCode = new Html5Qrcode("reader");
         });
 
@@ -227,18 +216,30 @@
 
             html5QrCode.start(
                 { facingMode: "environment" }, // Prioritas kamera belakang
-                { fps: 10, qrbox: { width: 250, height: 250 } },
+                { 
+                    fps: 10, 
+                    qrbox: { width: 220, height: 220 }, // FIX 1: Diperkecil agar masuk di layar iPhone
+                    aspectRatio: 1.0,
+                    formatsToSupport: [ Html5QrcodeSupportedFormats.QR_CODE ] // FIX 2: Paksa hanya baca QR, abaikan Barcode biasa
+                },
                 onScanSuccess,
-                (errorMessage) => { /* Abaikan error tiap frame frame */ }
+                (errorMessage) => { /* Abaikan pesan error pemindaian per-frame */ }
             ).then(() => {
                 isScanning = true;
                 btnStartCamera.disabled = false;
                 btnStartCamera.innerHTML = "⏹ Matikan Kamera";
                 btnStartCamera.className = "w-full bg-slate-500 text-white font-bold py-3 px-4 rounded-xl mt-4 shadow-md hover:bg-slate-600 transition-all flex justify-center items-center gap-2";
+                
+                // FIX 3: Paksa atribut playsinline untuk Safari iOS agar video tidak patah
+                const videoEl = document.querySelector("#reader video");
+                if(videoEl) {
+                    videoEl.setAttribute("playsinline", "true");
+                    videoEl.setAttribute("webkit-playsinline", "true");
+                }
             }).catch((err) => {
                 btnStartCamera.disabled = false;
                 btnStartCamera.textContent = "Mulai Kamera";
-                alert("Gagal membuka kamera. Pastikan Anda telah memberikan izin (Allow) pada browser.");
+                alert("Gagal membuka kamera. Pastikan Anda telah memberikan izin (Allow) kamera pada browser Safari/Chrome Anda.");
             });
         }
 
@@ -255,7 +256,7 @@
         }
 
         function onScanSuccess(decodedText, decodedResult) {
-            // Hentikan kamera sementara setelah QR ditemukan
+            // Hentikan kamera sementara setelah QR ditemukan agar tidak berat
             stopCamera();
             currentWaScanned = decodedText;
             fetchDataSiswa(decodedText);
