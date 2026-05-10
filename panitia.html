@@ -88,10 +88,14 @@
         <div id="tabRekap" class="hidden space-y-4">
             <div class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-slate-100">
                 <div>
-                    <h2 class="font-bold text-maroon">Total Kehadiran</h2>
+                    <h2 class="font-bold text-maroon" id="totalKehadiranText">Total Hadir: 0</h2>
+                    <div class="flex gap-2 mt-1 mb-1">
+                        <span class="text-[10px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded-md font-bold uppercase tracking-wider" id="countSiswa">Siswa: 0</span>
+                        <span class="text-[10px] bg-green-100 text-green-800 px-2 py-0.5 rounded-md font-bold uppercase tracking-wider" id="countOrtu">Ortu: 0</span>
+                    </div>
                     <p class="text-xs text-slate-500" id="lastSync">Sinkronisasi terakhir: -</p>
                 </div>
-                <button onclick="loadRekap()" class="w-10 h-10 bg-bluelight/20 text-maroon rounded-full flex items-center justify-center hover:bg-bluelight/40 transition">
+                <button onclick="loadRekap()" class="w-10 h-10 bg-bluelight/20 text-maroon rounded-full flex items-center justify-center hover:bg-bluelight/40 transition shrink-0">
                     🔄
                 </button>
             </div>
@@ -256,8 +260,6 @@
         }
 
         function onScanSuccess(decodedText, decodedResult) {
-            // FIX iPHONE TERBARU: Jangan matikan kamera! 
-            // Cukup gunakan gembok software agar tidak nyecan berulang kali.
             if (ignoreScans) return; // Jika digembok, abaikan pemindaian
             
             ignoreScans = true; // Kunci gembok sekarang
@@ -332,12 +334,10 @@
                 const result = await res.json();
                 
                 if(result.status === "success") {
-                    // Alert ini menggunakan browser default
                     alert("Berhasil! Kehadiran " + currentNamaScanned + " telah dicatat.");
                     closeModal();
                 } else {
                     alert("Gagal menyimpan: " + result.message);
-                    // Biarkan modal tetap terbuka agar bisa coba simpan lagi
                 }
             } catch (err) {
                 alert("Terjadi kesalahan jaringan.");
@@ -348,7 +348,7 @@
         });
 
         // ==========================================
-        // REKAP LOGIC (DAFTAR HADIR)
+        // REKAP LOGIC (DAFTAR HADIR) & PENGHITUNG TOTAL
         // ==========================================
         async function loadRekap() {
             const container = document.getElementById('rekapContainer');
@@ -364,19 +364,33 @@
                     
                     if (data.length === 0) {
                         container.innerHTML = '<p class="text-center text-sm text-slate-400 py-10">Belum ada tamu yang check-in hari ini.</p>';
+                        document.getElementById('totalKehadiranText').textContent = 'Total Hadir: 0';
+                        document.getElementById('countSiswa').textContent = 'Siswa: 0';
+                        document.getElementById('countOrtu').textContent = 'Ortu: 0';
                         return;
                     }
 
                     const now = new Date();
                     document.getElementById('lastSync').textContent = `Sinkronisasi: ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')} WIB`;
 
+                    let totalSiswa = 0;
+                    let totalOrtu = 0;
+                    let totalKeluarga = 0;
+
                     data.forEach(item => {
+                        const hadirSiswa = item.siswa === "HADIR";
+                        const hadirOrtu = item.ortu === "HADIR";
+
+                        if (hadirSiswa) totalSiswa++;
+                        if (hadirOrtu) totalOrtu++;
+                        if (hadirSiswa || hadirOrtu) totalKeluarga++;
+
                         const t = new Date(item.waktu);
                         const jam = String(t.getHours()).padStart(2,'0') + ":" + String(t.getMinutes()).padStart(2,'0');
                         
-                        const badgeSiswa = item.siswa === "HADIR" ? '<span class="bg-blue-100 text-blue-800 text-[10px] px-2 py-1 rounded-md font-bold uppercase tracking-wider">Siswa</span>' : '';
-                        const badgeOrtu = item.ortu === "HADIR" ? '<span class="bg-green-100 text-green-800 text-[10px] px-2 py-1 rounded-md font-bold uppercase tracking-wider">Ortu</span>' : '';
-                        const textNone = (item.siswa !== "HADIR" && item.ortu !== "HADIR") ? '<span class="text-xs text-red-500 font-bold">Uncheck / Batal</span>' : '';
+                        const badgeSiswa = hadirSiswa ? '<span class="bg-blue-100 text-blue-800 text-[10px] px-2 py-1 rounded-md font-bold uppercase tracking-wider">Siswa</span>' : '';
+                        const badgeOrtu = hadirOrtu ? '<span class="bg-green-100 text-green-800 text-[10px] px-2 py-1 rounded-md font-bold uppercase tracking-wider">Ortu</span>' : '';
+                        const textNone = (!hadirSiswa && !hadirOrtu) ? '<span class="text-xs text-red-500 font-bold">Uncheck / Batal</span>' : '';
 
                         container.insertAdjacentHTML('beforeend', `
                             <div class="bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex items-center justify-between">
@@ -392,6 +406,11 @@
                             </div>
                         `);
                     });
+
+                    // Update UI Counter
+                    document.getElementById('totalKehadiranText').textContent = `Total Hadir: ${totalKeluarga} Keluarga`;
+                    document.getElementById('countSiswa').textContent = `Siswa: ${totalSiswa}`;
+                    document.getElementById('countOrtu').textContent = `Ortu: ${totalOrtu}`;
 
                 } else {
                     container.innerHTML = `<p class="text-center text-sm text-red-500 py-10">Gagal menarik data: ${result.message}</p>`;
